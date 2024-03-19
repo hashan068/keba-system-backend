@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'djoser',
     'Sales',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -52,6 +53,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',#
+]
+
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
 ]
 
 ROOT_URLCONF = 'MTOIMS.urls'
@@ -124,19 +131,17 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-# REST FRAMEWORK SETTINGS
-REST_FRAMEWORK: {
+REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',  # Corrected typo here
-        'rest_framework.renderers.XMLRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
     ],
-
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication'
     ],
 }
+
 
 # DJOSER SETTINGS
 # This is how you specify which field in your user model will act as the primary key.
