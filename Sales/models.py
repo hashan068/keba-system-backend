@@ -18,6 +18,8 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
+
+
 class SalesOrder(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
