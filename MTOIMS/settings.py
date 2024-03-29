@@ -46,7 +46,7 @@ MIDDLEWARE = [
 
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000',
+    'http://localhost:3000', 'http://localhost:5173',
 ]
 
 ROOT_URLCONF = 'MTOIMS.urls'
@@ -136,4 +136,21 @@ REST_FRAMEWORK = {
 DJOSER = {
     "USER_ID_FIELD": "username",
     # "LOGIN_FIELD": "email"
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
 }
