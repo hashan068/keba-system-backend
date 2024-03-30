@@ -1,6 +1,7 @@
 from django.db import models
 
-######################################## Customer ###################################################
+
+# Customer
 class Customer(models.Model):
     name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
@@ -10,17 +11,17 @@ class Customer(models.Model):
     def __str__(self):
         return self.name
 
+
 class Product(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
 
-
     def __str__(self):
         return self.name
 
 
-######################################## SalesOrder ###################################################
+# -----------------------------------  SalesOrder ------------------------------------------
 
 class SalesOrder(models.Model):
     STATUS_CHOICES = [
@@ -41,7 +42,7 @@ class SalesOrder(models.Model):
         return f"Order #{self.pk} for {self.customer.name}"
 
 
-###################################### SalesOrderItem #################################################
+# -----------------------------------  SalesOrderItem ------------------------------------------
 
 class SalesOrderItem(models.Model):
     order = models.ForeignKey(SalesOrder, on_delete=models.CASCADE, related_name='order_items')
