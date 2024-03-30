@@ -30,6 +30,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'djoser',
     'Sales',
+    'Manufacturing',
+    'Inventory',
     'corsheaders',
 ]
 
