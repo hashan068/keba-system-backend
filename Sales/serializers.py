@@ -1,4 +1,3 @@
-# sales/serializers.py
 from rest_framework import serializers
 from .models import Customer, Product, SalesOrder, SalesOrderItem
 
@@ -7,19 +6,29 @@ class CustomerSerializer(serializers.ModelSerializer):
         model = Customer
         fields = '__all__'
 
+
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = '__all__'
 
+
 class SalesOrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = SalesOrderItem
-        fields = '__all__'
+        fields = ['product', 'quantity', 'price']
+
 
 class SalesOrderSerializer(serializers.ModelSerializer):
-    order_items = SalesOrderItemSerializer(many=True, read_only=True)
+    order_items = SalesOrderItemSerializer(many=True)
 
     class Meta:
         model = SalesOrder
-        fields = '__all__'
+        fields = ['id', 'customer', 'order_items', 'total_amount', 'status', 'created_at', 'updated_at']
+
+    def create(self, validated_data):
+        order_items_data = validated_data.pop('order_items')
+        sales_order = SalesOrder.objects.create(**validated_data)
+        for order_item_data in order_items_data:
+            SalesOrderItem.objects.create(order=sales_order, **order_item_data)
+        return sales_order
