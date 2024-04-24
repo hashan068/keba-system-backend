@@ -1,37 +1,36 @@
-# views.py
-from rest_framework import viewsets
-from .models import Customer, Product, SalesOrder
-from .serializers import CustomerSerializer, ProductSerializer, SalesOrderSerializer
-
-from rest_framework.decorators import action
+from rest_framework import viewsets, status
+from rest_framework.response import Response
+from .models import Customer, Product, SalesOrder, SalesOrderItem
+from .serializers import CustomerSerializer, ProductSerializer, SalesOrderSerializer, SalesOrderItemSerializer
 
 class CustomerViewSet(viewsets.ModelViewSet):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
 
+
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+
+
+class SalesOrderItemViewSet(viewsets.ModelViewSet):
+    queryset = SalesOrderItem.objects.all()
+    serializer_class = SalesOrderItemSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class SalesOrderViewSet(viewsets.ModelViewSet):
     queryset = SalesOrder.objects.all()
     serializer_class = SalesOrderSerializer
 
-    @action(detail=True, methods=['post'])
-    def cancel_order(self, request, pk=None):
-        order = self.get_object()
-        order.status = 'cancelled'
-        order.save()
-        serializer = self.get_serializer(order)
-        return Response(serializer.data)
-
-    @action(detail=True, methods=['post'])
-    def update_order_status(self, request, pk=None):
-        order = self.get_object()
-        status = request.data.get('status')
-        if status:
-            order.status = status
-            order.save()
-            serializer = self.get_serializer(order)
-            return Response(serializer.data)
-        return Response({'error': 'Status not provided'}, status=400)
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

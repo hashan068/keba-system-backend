@@ -1,5 +1,6 @@
-# sales/serializers.py
 from rest_framework import serializers
+from decimal import Decimal
+
 from .models import Customer, Product, SalesOrder, SalesOrderItem
 
 class CustomerSerializer(serializers.ModelSerializer):
@@ -15,11 +16,26 @@ class ProductSerializer(serializers.ModelSerializer):
 class SalesOrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = SalesOrderItem
-        fields = '__all__'
+        fields = ['product', 'quantity', 'price']
+        
 
 class SalesOrderSerializer(serializers.ModelSerializer):
-    order_items = SalesOrderItemSerializer(many=True, read_only=True)
+    order_items = SalesOrderItemSerializer(many=True)
 
     class Meta:
         model = SalesOrder
-        fields = '__all__'
+        fields = ['id', 'customer', 'order_items', 'total_amount', 'status', 'created_at', 'updated_at']
+
+    def create(self, validated_data):
+        order_items_data = validated_data.pop('order_items')
+
+        total_amount = sum(Decimal(item['price']) * item['quantity'] for item in order_items_data)
+        validated_data['total_amount'] = total_amount
+
+        sales_order = SalesOrder.objects.create(**validated_data)
+
+        for order_item_data in order_items_data:
+            SalesOrderItem.objects.create(order=sales_order, **order_item_data)
+
+        return sales_order
+
