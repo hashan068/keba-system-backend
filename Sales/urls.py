@@ -8,8 +8,12 @@ router = routers.DefaultRouter()
 # Register the viewsets for the API endpoints
 router.register(r'customers', views.CustomerViewSet)
 router.register(r'products', views.ProductViewSet)
+router.register(r'rfqs', views.RFQViewSet)
+router.register(r'rfq-items', views.RFQItemViewSet)
 router.register(r'orders', views.SalesOrderViewSet)
 router.register(r'order-items', views.SalesOrderItemViewSet)
+router.register(r'quotations', views.QuotationViewSet, basename='quotation')
+router.register(r'quotation-items', views.QuotationItemViewSet, basename='quotation-item')
 
 urlpatterns = [
     # Include the API endpoints in the URL patterns

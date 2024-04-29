@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from decimal import Decimal
 
-from .models import Customer, Product, SalesOrder, SalesOrderItem
+from .models import Customer, Product, RFQ, RFQItem, SalesOrder, SalesOrderItem, Quotation, QuotationItem
+from rest_framework import serializers
 
 class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
@@ -13,6 +14,32 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = '__all__'
 
+class RFQItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RFQItem
+        fields = ('id', 'rfq', 'product', 'quantity', 'unit_price')
+
+class RFQSerializer(serializers.ModelSerializer):
+    items = RFQItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = RFQ
+        fields = ('id', 'creator', 'created_at', 'updated_at', 'status', 'due_date', 'description', 'items')
+
+class QuotationItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuotationItem
+        fields = '__all__'
+
+
+class QuotationSerializer(serializers.ModelSerializer):
+    quotation_items = QuotationItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Quotation
+        fields = '__all__'
+
+
 class SalesOrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = SalesOrderItem
@@ -21,10 +48,10 @@ class SalesOrderItemSerializer(serializers.ModelSerializer):
 
 class SalesOrderSerializer(serializers.ModelSerializer):
     order_items = SalesOrderItemSerializer(many=True)
-
+    customer_name = serializers.CharField(source='customer.name', read_only=True)
     class Meta:
         model = SalesOrder
-        fields = ['id', 'customer', 'order_items', 'total_amount', 'status', 'created_at', 'updated_at']
+        fields = ['id', 'customer', 'customer_name', 'order_items', 'total_amount', 'status', 'created_at', 'updated_at']
 
     def create(self, validated_data):
         order_items_data = validated_data.pop('order_items')
