@@ -1,5 +1,4 @@
 from django.db import models
-from django.utils import timezone
 from django.contrib.auth.models import User
 
 class Customer(models.Model):
@@ -56,8 +55,7 @@ class Quotation(models.Model):
         ('cancelled', 'Cancelled'),
     ]
 
-    rfq = models.ForeignKey(RFQ, on_delete=models.PROTECT, related_name='quotations')
-    quotation_number = models.CharField(max_length=20, unique=True)
+    customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='quotations')
     date = models.DateField()
     expiration_date = models.DateField()
     invoicing_and_shipping_address = models.TextField()
@@ -67,7 +65,7 @@ class Quotation(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Quotation #{self.quotation_number}"
+        return f"Quotation #{self.pk} for {self.customer.name}"
 
 
 class QuotationItem(models.Model):
@@ -75,9 +73,7 @@ class QuotationItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='quotation_items')
     quantity = models.PositiveIntegerField(default=1)
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
-    discount_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    taxes = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+
 
     def __str__(self):
         return f"{self.quantity} x {self.product.name}"

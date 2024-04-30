@@ -26,19 +26,31 @@ class RFQSerializer(serializers.ModelSerializer):
         model = RFQ
         fields = ('id', 'creator', 'created_at', 'updated_at', 'status', 'due_date', 'description', 'items')
 
+# serializers.py
 class QuotationItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuotationItem
-        fields = '__all__'
-
+        fields = ['product', 'quantity', 'unit_price']
 
 class QuotationSerializer(serializers.ModelSerializer):
-    quotation_items = QuotationItemSerializer(many=True, read_only=True)
+    quotation_items = QuotationItemSerializer(many=True)
+    customer_name = serializers.CharField(source='customer.name', read_only=True)
 
     class Meta:
         model = Quotation
-        fields = '__all__'
+        fields = ['id', 'customer', 'customer_name', 'date', 'expiration_date', 'invoicing_and_shipping_address', 'total_amount', 'status', 'quotation_items']
 
+    def create(self, validated_data):
+        quotation_items_data = validated_data.pop('quotation_items')
+        total_amount = sum(item['quantity'] * item['unit_price'] for item in quotation_items_data)
+        validated_data['total_amount'] = total_amount
+
+        quotation = Quotation.objects.create(**validated_data)
+
+        for quotation_item_data in quotation_items_data:
+            QuotationItem.objects.create(quotation=quotation, **quotation_item_data)
+
+        return quotation
 
 class SalesOrderItemSerializer(serializers.ModelSerializer):
     class Meta:
