@@ -1,3 +1,11 @@
 Username: hashan
 Email address: hashan@gmail.com
 Password:123456
+
+## To view a pretty Git branch graph, you can use various Git visualization tools and com
+git log --graph --oneline --decorate --all
+
+--graph: Draws a text-based graph of the commit history.
+--oneline: Condenses each commit to a single line.
+--decorate: Displays branch and tag names next to the corresponding commits.
+--all: Shows the entire commit history, including all branches.

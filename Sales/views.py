@@ -34,14 +34,16 @@ class QuotationItemViewSet(viewsets.ModelViewSet):
 #     # For example, you can use the highest existing quotation number and increment it by 1.
 #     pass
 
+
 class QuotationViewSet(viewsets.ModelViewSet):
     queryset = Quotation.objects.all()
     serializer_class = QuotationSerializer
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
+
         if serializer.is_valid():
-            serializer.save()
+            quotation = serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
