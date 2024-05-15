@@ -1,6 +1,6 @@
 # Serializers for Manufacturing app
 from rest_framework import serializers
-from .models import ManufacturingOrder, MaterialRequisition, BillOfMaterial, BOMItem
+from .models import ManufacturingOrder, MaterialRequisition,MaterialRequisitionItem, BillOfMaterial, BOMItem
 from Inventory.models import Component, Supplier, PurchaseRequisition, PurchaseOrder, InventoryTransaction
 from Sales.models import SalesOrderItem
 from Inventory.serializers import ComponentSerializer
