@@ -1,5 +1,8 @@
+# our models for the Sales app
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
+
 
 class Customer(models.Model):
     name = models.CharField(max_length=100)
@@ -10,12 +13,11 @@ class Customer(models.Model):
     def __str__(self):
         return self.name
 
-
 class Product(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    # photo = models.ImageField(upload_to="cars")
+    bom = models.ForeignKey('Manufacturing.BillOfMaterial', on_delete=models.CASCADE, related_name='products', null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -47,13 +49,14 @@ class RFQItem(models.Model):
     def __str__(self):
         return f"{self.product.name} - {self.quantity} x {self.unit_price}"
 
-
 class Quotation(models.Model):
     STATUS_CHOICES = [
-        ('pending', 'Pending'),
+        ('quotation', 'Quotation'),
+        ('quotation_sent', 'Quotation Sent'),
         ('accepted', 'Accepted'),
         ('rejected', 'Rejected'),
         ('cancelled', 'Cancelled'),
+        ('expired', 'Expired')
     ]
 
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='quotations')
@@ -68,24 +71,24 @@ class Quotation(models.Model):
     def __str__(self):
         return f"Quotation #{self.pk} for {self.customer.name}"
 
-
 class QuotationItem(models.Model):
     quotation = models.ForeignKey(Quotation, on_delete=models.CASCADE, related_name='quotation_items')
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='quotation_items')
     quantity = models.PositiveIntegerField(default=1)
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
 
-
     def __str__(self):
         return f"{self.quantity} x {self.product.name}"
-
 
 class SalesOrder(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('confirmed', 'Confirmed'),
-        ('shipped', 'Shipped'),
+        ('processing', 'Processing'),
+        ('in_Production', 'In Production'),
+        ('Ready_for_delivery', 'Ready for delivery'),
         ('cancelled', 'Cancelled'),
+        ('delivered', 'Delivered'),
     ]
 
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='orders')
@@ -96,7 +99,6 @@ class SalesOrder(models.Model):
 
     def __str__(self):
         return f"Order #{self.pk} for {self.customer.name}"
-
 
 class SalesOrderItem(models.Model):
     order = models.ForeignKey(SalesOrder, on_delete=models.CASCADE, related_name='order_items')

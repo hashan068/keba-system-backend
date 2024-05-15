@@ -1,3 +1,4 @@
+# # Sales app serializers.py
 from rest_framework import serializers
 from decimal import Decimal
 from datetime import datetime
@@ -11,15 +12,18 @@ class CustomerSerializer(serializers.ModelSerializer):
         model = Customer
         fields = '__all__'
 
+
 class ProductSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source='name')
     class Meta:
         model = Product
-        fields = '__all__'
+        fields = ['id', 'product_name', 'description', 'price', 'bom']
 
 class RFQItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = RFQItem
         fields = ('id', 'rfq', 'product', 'quantity', 'unit_price')
+
 
 class RFQSerializer(serializers.ModelSerializer):
     items = RFQItemSerializer(many=True, read_only=True)
@@ -28,7 +32,7 @@ class RFQSerializer(serializers.ModelSerializer):
         model = RFQ
         fields = ('id', 'creator', 'created_at', 'updated_at', 'status', 'due_date', 'description', 'items')
 
-# serializers.py
+
 class QuotationItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuotationItem
@@ -42,14 +46,15 @@ class QuotationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Quotation
-        fields = ['id', 'customer', 'customer_name', 'date', 'expiration_date', 'invoicing_and_shipping_address', 'total_amount', 'status', 'quotation_items']
+        fields = ['id', 'customer', 'customer_name', 'date', 'expiration_date',
+                  'invoicing_and_shipping_address', 'total_amount', 'status', 'quotation_items']
 
     def get_date(self, obj):
         return obj.date.strftime('%Y-%m-%d')
 
     def get_expiration_date(self, obj):
         return obj.expiration_date.strftime('%Y-%m-%d')
-        
+
     def create(self, validated_data):
         quotation_items_data = validated_data.pop('quotation_items')
         total_amount = sum(item['quantity'] * item['unit_price'] for item in quotation_items_data)
@@ -62,17 +67,24 @@ class QuotationSerializer(serializers.ModelSerializer):
 
 
 class SalesOrderItemSerializer(serializers.ModelSerializer):
+    sales_order_item_id = serializers.IntegerField(source='id', read_only=True)
+    product_name = serializers.CharField(source='product.name', read_only=True)
     class Meta:
-        model = SalesOrderItem
-        fields = ['product', 'quantity', 'price']
+        model = SalesOrderItem 
+        fields = ['sales_order_item_id', 'product','product_name', 'quantity', 'price']
         
 
 class SalesOrderSerializer(serializers.ModelSerializer):
     order_items = SalesOrderItemSerializer(many=True)
     customer_name = serializers.CharField(source='customer.name', read_only=True)
+    created_at_date = serializers.SerializerMethodField()
+
     class Meta:
         model = SalesOrder
-        fields = ['id', 'customer', 'customer_name', 'order_items', 'total_amount', 'status', 'created_at', 'updated_at']
+        fields = ['id', 'customer', 'customer_name', 'order_items', 'total_amount', 'status', 'created_at_date', 'updated_at']
+
+    def get_created_at_date(self, obj):
+        return obj.created_at.date()
 
     def create(self, validated_data):
         order_items_data = validated_data.pop('order_items')
@@ -86,15 +98,3 @@ class SalesOrderSerializer(serializers.ModelSerializer):
             SalesOrderItem.objects.create(order=sales_order, **order_item_data)
 
         return sales_order
-
-    # def create(self, validated_data):
-    #     quotation_items_data = validated_data.pop('quotation_items')
-    #     total_amount = sum(item['quantity'] * item['unit_price'] for item in quotation_items_data)
-    #     validated_data['total_amount'] = total_amount
-
-    #     quotation = Quotation.objects.create(**validated_data)
-
-    #     for quotation_item_data in quotation_items_data:
-    #         QuotationItem.objects.create(quotation=quotation, **quotation_item_data)
-
-    #     return quotation

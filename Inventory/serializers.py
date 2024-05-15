@@ -1,5 +1,6 @@
+# Inventory Serializers
 from rest_framework import serializers
-from .models import Component, PurchaseRequisition, PurchaseOrder, InventoryTransaction, ScrappedManufacturingOrder
+from .models import Component, PurchaseRequisition, PurchaseOrder, InventoryTransaction
 
 class ComponentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -21,7 +22,4 @@ class InventoryTransactionSerializer(serializers.ModelSerializer):
         model = InventoryTransaction
         fields = '__all__'
 
-class ScrappedManufacturingOrderSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ScrappedManufacturingOrder
-        fields = '__all__'
+

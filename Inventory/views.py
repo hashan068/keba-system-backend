@@ -1,6 +1,6 @@
 from rest_framework import generics
-from .models import Component, PurchaseRequisition, PurchaseOrder, InventoryTransaction, ScrappedManufacturingOrder
-from .serializers import ComponentSerializer, PurchaseRequisitionSerializer, PurchaseOrderSerializer, InventoryTransactionSerializer, ScrappedManufacturingOrderSerializer
+from .models import Component, PurchaseRequisition, PurchaseOrder, InventoryTransaction
+from .serializers import ComponentSerializer, PurchaseRequisitionSerializer, PurchaseOrderSerializer, InventoryTransactionSerializer
 
 class ComponentListCreateView(generics.ListCreateAPIView):
     queryset = Component.objects.all()

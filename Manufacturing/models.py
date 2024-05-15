@@ -1,6 +1,9 @@
 from django.db import models
-from Sales.models import SalesOrder
 from django.utils.translation import gettext_lazy as _
+from Sales.models import SalesOrderItem, Product
+from Inventory.models import Component
+from django.utils import timezone
+
 
 class ManufacturingOrder(models.Model):
     STATUS_CHOICES = [
@@ -10,26 +13,42 @@ class ManufacturingOrder(models.Model):
         ('cancelled', _('Cancelled')),
     ]
 
-    sales_order = models.ForeignKey('Sales.SalesOrder', on_delete=models.CASCADE, related_name='manufacturing_orders')
+    sales_order_item = models.ForeignKey(SalesOrderItem, on_delete=models.CASCADE, related_name='manufacturing_orders', null=True, blank=True)
+    product_id = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='manufacturing_orders', null=True, blank=True)
+    quantity = models.PositiveIntegerField(default=1)
+    bom = models.ForeignKey('BillOfMaterial', on_delete=models.CASCADE, related_name='manufacturing_orders', null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Manufacturing Order for {self.sales_order}"
+        if self.sales_order_item:
+            return f"Quotation #{self.pk}"
+        else:
+            return "Manufacturing Order with no associated Sales Order Item"
+
+
 
 class MaterialRequisition(models.Model):
     manufacturing_order = models.ForeignKey(ManufacturingOrder, on_delete=models.CASCADE, related_name='material_requisitions')
-    # Add other fields as needed
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"Material Requisition for {self.manufacturing_order}"
 
+class MaterialRequisitionItem(models.Model):
+    material_requisition = models.ForeignKey(MaterialRequisition, on_delete=models.CASCADE, related_name='items')
+    component = models.ForeignKey(Component, on_delete=models.CASCADE, related_name='material_requisition_items')
+    quantity = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f"{self.quantity} x {self.component} for Material Requisition {self.material_requisition}"
+
+
 class BillOfMaterial(models.Model):
     name = models.CharField(max_length=100)
-    # Add other fields as needed
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='boms', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -38,12 +57,11 @@ class BillOfMaterial(models.Model):
 
 class BOMItem(models.Model):
     bill_of_material = models.ForeignKey(BillOfMaterial, on_delete=models.CASCADE, related_name='bom_items')
-    product = models.ForeignKey('Sales.Product', on_delete=models.CASCADE, related_name='bom_items')
+    component = models.ForeignKey(Component, on_delete=models.CASCADE, related_name='bom_items', null=True,default=1, blank=True)
     quantity = models.PositiveIntegerField()
 
     def __str__(self):
-        return f"{self.quantity} x {self.product}"
+        return f"{self.quantity} x {self.component}"
 
     class Meta:
         verbose_name = _('BOM Item')
-        verbose_name_plural = _('BOM Items')

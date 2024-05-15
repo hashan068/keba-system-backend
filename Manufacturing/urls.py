@@ -9,5 +9,6 @@ router.register(r'bills-of-material', BillOfMaterialViewSet)
 router.register(r'bom-items', BOMItemViewSet)
 
 urlpatterns = [
+
     path('', include(router.urls)),
 ]
