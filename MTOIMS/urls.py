@@ -10,7 +10,8 @@ urlpatterns = [
     path('api/token', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh', TokenRefreshView.as_view(), name='token_refresh'),
     path('', RedirectView.as_view(url='/admin/')),
+
     path('api/sales/', include('Sales.urls')),
     path('api/manufacturing/', include('Manufacturing.urls')),
-    # path('api/inventory/', include('Inventory.urls')),
+    path('api/inventory/', include('Inventory.urls')),
 ]

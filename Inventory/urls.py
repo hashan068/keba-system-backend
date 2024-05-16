@@ -1,16 +1,20 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from .views import (
-    ComponentListCreateView,
-    ComponentRetrieveUpdateDestroyView,
-    PurchaseRequisitionListCreateView,
-    PurchaseRequisitionRetrieveUpdateDestroyView,
-
+    ComponentViewSet,
+    PurchaseRequisitionViewSet,
+    PurchaseOrderViewSet,
+    InventoryTransactionViewSet,
+    SupplierViewSet,
 )
 
-urlpatterns = [
-    path('components/', ComponentListCreateView.as_view(), name='component-list-create'),
-    path('components/<int:pk>/', ComponentRetrieveUpdateDestroyView.as_view(), name='component-retrieve-update-destroy'),
-    path('purchase-requisitions/', PurchaseRequisitionListCreateView.as_view(), name='purchase-requisition-list-create'),
-    path('purchase-requisitions/<int:pk>/', PurchaseRequisitionRetrieveUpdateDestroyView.as_view(), name='purchase-requisition-retrieve-update-destroy'),
+router = DefaultRouter()
+router.register(r'components', ComponentViewSet, basename='component')
+router.register(r'purchase-requisitions', PurchaseRequisitionViewSet, basename='purchase-requisition')
+router.register(r'purchase-orders', PurchaseOrderViewSet, basename='purchase-order')
+router.register(r'inventory-transactions', InventoryTransactionViewSet, basename='inventory-transaction')
+router.register(r'suppliers', SupplierViewSet, basename='supplier')
 
+urlpatterns = [
+    path('', include(router.urls)),
 ]

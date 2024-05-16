@@ -1,6 +1,16 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
+from django.conf import settings
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+def get_default_user():
+    return User.objects.filter(is_superuser=True).first()
+
+superuser = get_default_user()
+superuser_pk = superuser.pk if superuser else 1
 
 class Component(models.Model):
     name = models.CharField(max_length=100)
@@ -15,52 +25,141 @@ class Component(models.Model):
         return self.name
 
 class PurchaseRequisition(models.Model):
-    component = models.ForeignKey(Component, on_delete=models.CASCADE)
+    CREATED = 'created'
+    PENDING = 'pending'
+    APPROVED = 'approved'
+    REJECTED = 'rejected'
+    CANCELLED = 'cancelled'
+    STATUS_CHOICES = [
+        (CREATED, _('Created')),
+        (PENDING, _('Pending')),
+        (APPROVED, _('Approved')),
+        (REJECTED, _('Rejected')),
+        (CANCELLED, _('Cancelled'))
+    ]
+
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=get_default_user)
+    component = models.ForeignKey('Component', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     status = models.CharField(
         max_length=20,
-        choices=[
-            ('pending', 'Pending'),
-            ('approved', 'Approved'),
-            ('rejected', 'Rejected')
-        ],
-        default='pending'
+        choices=STATUS_CHOICES,
+        default=CREATED
     )
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
 
     def __str__(self):
-        return f"Purchase Requisition for {self.component} - Quantity: {self.quantity}"
+        return f"Purchase Requisition #{self.id} - {self.component} - {self.quantity} units"
+
+class MaterialRequisition(models.Model):
+    CREATED = 'created'
+    PENDING = 'pending'
+    APPROVED = 'approved'
+    REJECTED = 'rejected'
+    CANCELLED = 'cancelled'
+    STATUS_CHOICES = [
+        (CREATED, _('Created')),
+        (PENDING, _('Pending')),
+        (APPROVED, _('Approved')),
+        (REJECTED, _('Rejected')),
+        (CANCELLED, _('Cancelled'))
+    ]
+
+    manufacturing_order = models.ForeignKey('Manufacturing.ManufacturingOrder', on_delete=models.CASCADE)
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=get_default_user)
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=CREATED
+    )
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Material Requisition #{self.id} - {self.manufacturing_order}"
+
+class MaterialRequisitionItem(models.Model):
+    material_requisition = models.ForeignKey('MaterialRequisition', on_delete=models.CASCADE)
+    component = models.ForeignKey('Component', on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f"{self.quantity} units of {self.component} for {self.material_requisition}"
 
 class PurchaseOrder(models.Model):
-    purchase_requisition = models.ForeignKey(PurchaseRequisition, on_delete=models.CASCADE)
+    CREATED = 'created'
+    PENDING = 'pending'
+    APPROVED = 'approved'
+    REJECTED ='rejected'
+    CANCELLED = 'cancelled'
+    STATUS_CHOICES = [
+        (CREATED, _('Created')),
+        (PENDING, _('Pending')),
+        (APPROVED, _('Approved')),
+        (REJECTED, _('Rejected')),
+        (CANCELLED, _('Cancelled'))
+    ]
+
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, default=None)
+    purchase_requisition = models.ForeignKey('PurchaseRequisition', on_delete=models.CASCADE)
+    supplier = models.ForeignKey('Supplier', on_delete=models.SET_NULL, null=True, blank=True)
     purchase_manager_approval = models.BooleanField(default=False)
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=CREATED
+    )
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(default=timezone.now, editable=False)
+    updated_at = models.DateTimeField(default=timezone.now, editable=False)
+
+    class Meta:
+        ordering = ['-created_at']
 
     def __str__(self):
-        return f"Purchase Order for {self.purchase_requisition.component} - Quantity: {self.purchase_requisition.quantity}"
+        return f"Purchase Order #{self.id} - {self.purchase_requisition.component} - {self.purchase_requisition.quantity} units"
 
 class InventoryTransaction(models.Model):
-    component = models.ForeignKey(Component, on_delete=models.CASCADE)
+    REPLENISH ='replenish'
+    CONSUMPTION = 'consumption'
+    SCRAPPING ='scrapping'
+    TRANSACTION_TYPES = [
+        (REPLENISH, _('Replenish')),
+        (CONSUMPTION, _('Consumption')),
+        (SCRAPPING, _('Scrapping'))
+    ]
+
+    component = models.ForeignKey('Component', on_delete=models.CASCADE)
     quantity = models.IntegerField()
     transaction_type = models.CharField(
         max_length=20,
-        choices=[
-            ('purchase', 'Purchase'),
-            ('consumption', 'Consumption'),
-            ('scrapping', 'Scrapping')
-        ]
+        choices=TRANSACTION_TYPES,
+        default=REPLENISH
     )
     related_document = models.CharField(max_length=100, blank=True)
-    timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField(default=timezone.now, editable=False)
+
+    class Meta:
+        ordering = ['-timestamp']
 
     def __str__(self):
-        return f"{self.transaction_type.capitalize()} of {self.quantity} {self.component} at {self.timestamp}"
+        return f"{self.get_transaction_type_display().capitalize()} of {self.quantity} {self.component} at {self.timestamp}"
 
 class Supplier(models.Model):
     name = models.CharField(max_length=100)
-    contact_information = models.TextField()
-    lead_time = models.PositiveIntegerField()
+    email = models.EmailField(default=None)
     address = models.TextField(null=True, blank=True)
     website = models.URLField(blank=True, null=True)
-    date_added = models.DateTimeField(auto_now_add=True)
+    date_added = models.DateTimeField(auto_now_add=True, editable=False)
     is_active = models.BooleanField(default=True)
     notes = models.TextField(blank=True, null=True)
 

@@ -21,6 +21,9 @@ class ManufacturingOrder(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        ordering = ['-created_at']
+
     def __str__(self):
         if self.sales_order_item:
             return f"Quotation #{self.pk}"

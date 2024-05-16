@@ -8,24 +8,36 @@ from django.shortcuts import get_object_or_404
 
 
 class BOMItemSerializer(serializers.ModelSerializer):
-    component = ComponentSerializer(read_only=True)
     class Meta:
         model = BOMItem
-        fields = '__all__'
+        fields = ['id', 'bill_of_material', 'component', 'quantity']
+        read_only_fields = ['bill_of_material']
+
 
 class BillOfMaterialSerializer(serializers.ModelSerializer):
-    bom_items = BOMItemSerializer(many=True, read_only=True)
+    bom_items = BOMItemSerializer(many=True)
+    product_name = serializers.CharField(source='product.name', read_only=True)
+
     class Meta:
         model = BillOfMaterial
-        fields = '__all__'
+        fields = ('id', 'name', 'product', 'product_name', 'bom_items', 'created_at', 'updated_at')
+        read_only_fields = ('id', 'created_at', 'updated_at')
 
+    def create(self, validated_data):
+        bom_items_data = validated_data.pop('bom_items', [])
+        bill_of_material = BillOfMaterial.objects.create(**validated_data)
 
+        for bom_item_data in bom_items_data:
+            BOMItem.objects.create(bill_of_material=bill_of_material, **bom_item_data)
 
+        return bill_of_material
 
 class MaterialRequisitionItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = MaterialRequisitionItem
         fields = ['id', 'component', 'quantity']
+
+
 
 class MaterialRequisitionSerializer(serializers.ModelSerializer):
     items = MaterialRequisitionItemSerializer(many=True, read_only=True)
@@ -35,10 +47,8 @@ class MaterialRequisitionSerializer(serializers.ModelSerializer):
         fields = ['id', 'manufacturing_order', 'created_at', 'updated_at', 'items']
 
 
-
 class ManufacturingOrderSerializer(serializers.ModelSerializer):
     sales_order_item = serializers.PrimaryKeyRelatedField(queryset=SalesOrderItem.objects.all(), required=False, allow_null=True)
-
 
     class Meta:
         model = ManufacturingOrder
