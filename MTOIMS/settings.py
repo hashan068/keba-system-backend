@@ -3,6 +3,8 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+STATIC_ROOT = os.path.join(BASE_DIR,'staticfiles')
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
@@ -58,6 +60,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [],
+        # 'DIRS': [os.path.join(BASE_DIR, 'templates/')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -135,7 +138,7 @@ REST_FRAMEWORK = {
 
 
 # DJOSER SETTINGS
-# This is how you specify which field in your user model will act as the primary key.
+# This is how to specify which field in  user model will act as the primary key.
 DJOSER = {
     "USER_ID_FIELD": "username",
     # "LOGIN_FIELD": "email"
@@ -160,8 +163,14 @@ LOGGING = {
 
 JAZZMIN_SETTINGS = {
     # title of the window (Will default to current_admin_site.site_title if absent or None)
-    "site_title": "Keba Admin",
-    
+    "site_title": "Keba Admin",  
+
+    # Title on the login screen (19 chars max) (defaults to current_admin_site.site_header if absent or None)
+    "site_header": "KEBA ADMIN",
+
+    # Title on the brand (19 chars max) (defaults to current_admin_site.site_header if absent or None)
+    "site_brand": "KEBA ADMIN", 
+
     
     ############
     # Top Menu #
@@ -177,7 +186,6 @@ JAZZMIN_SETTINGS = {
         {"model": "auth.User"},
 
     ],
-
 
     # Copyright on the footer
     "copyright": "Keba Electronics Ltd",
