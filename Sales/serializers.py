@@ -1,10 +1,30 @@
-# # Sales app serializers.py
 from rest_framework import serializers
-from decimal import Decimal
-from datetime import datetime
-from django.utils.timezone import make_aware
-import pytz
 from .models import Customer, Product, RFQ, RFQItem, SalesOrder, SalesOrderItem, Quotation, QuotationItem
+from Manufacturing.models import BillOfMaterial
+from Manufacturing.serializers import BillOfMaterialSerializer
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source='name')
+    bom = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = ['id', 'product_name', 'description', 'price', 'bom']
+
+    def get_bom(self, obj):
+        try:
+            bom_instance = obj.bill_of_material.first()  # Retrieve the first instance of BillOfMaterial
+        except BillOfMaterial.DoesNotExist:
+            return "Not Available"
+
+        if bom_instance:
+            bom_id = bom_instance.id  # Get the ID of the BOM
+            return bom_id
+        else:
+            return "Not Available"
+
+
 
 
 class CustomerSerializer(serializers.ModelSerializer):
@@ -13,17 +33,10 @@ class CustomerSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ProductSerializer(serializers.ModelSerializer):
-    product_name = serializers.CharField(source='name')
-    class Meta:
-        model = Product
-        fields = ['id', 'product_name', 'description', 'price', 'bom']
-
 class RFQItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = RFQItem
         fields = ('id', 'rfq', 'product', 'quantity', 'unit_price')
-
 
 class RFQSerializer(serializers.ModelSerializer):
     items = RFQItemSerializer(many=True, read_only=True)
@@ -31,7 +44,6 @@ class RFQSerializer(serializers.ModelSerializer):
     class Meta:
         model = RFQ
         fields = ('id', 'creator', 'created_at', 'updated_at', 'status', 'due_date', 'description', 'items')
-
 
 class QuotationItemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -46,14 +58,7 @@ class QuotationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Quotation
-        fields = ['id', 'customer', 'customer_name', 'date', 'expiration_date',
-                  'invoicing_and_shipping_address', 'total_amount', 'status', 'quotation_items']
-
-    def get_date(self, obj):
-        return obj.date.strftime('%Y-%m-%d')
-
-    def get_expiration_date(self, obj):
-        return obj.expiration_date.strftime('%Y-%m-%d')
+        fields = ['id', 'customer', 'customer_name', 'date', 'expiration_date', 'invoicing_and_shipping_address', 'total_amount', 'status', 'quotation_items']
 
     def create(self, validated_data):
         quotation_items_data = validated_data.pop('quotation_items')
@@ -65,14 +70,13 @@ class QuotationSerializer(serializers.ModelSerializer):
             QuotationItem.objects.create(quotation=quotation, **quotation_item_data)
         return quotation
 
-
 class SalesOrderItemSerializer(serializers.ModelSerializer):
     sales_order_item_id = serializers.IntegerField(source='id', read_only=True)
     product_name = serializers.CharField(source='product.name', read_only=True)
+
     class Meta:
-        model = SalesOrderItem 
-        fields = ['sales_order_item_id', 'product','product_name', 'quantity', 'price']
-        
+        model = SalesOrderItem
+        fields = ['sales_order_item_id', 'product', 'product_name', 'quantity', 'price']
 
 class SalesOrderSerializer(serializers.ModelSerializer):
     order_items = SalesOrderItemSerializer(many=True)

@@ -7,6 +7,20 @@ from Inventory.serializers import ComponentSerializer
 from django.shortcuts import get_object_or_404
 
 
+class MaterialRequisitionItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MaterialRequisitionItem
+        fields = ['id', 'component', 'quantity']
+        
+
+class MaterialRequisitionSerializer(serializers.ModelSerializer):
+    items = MaterialRequisitionItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = MaterialRequisition
+        fields = ['id', 'manufacturing_order', 'created_at', 'updated_at', 'items']
+
+
 class BOMItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = BOMItem
@@ -31,20 +45,6 @@ class BillOfMaterialSerializer(serializers.ModelSerializer):
             BOMItem.objects.create(bill_of_material=bill_of_material, **bom_item_data)
 
         return bill_of_material
-
-class MaterialRequisitionItemSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MaterialRequisitionItem
-        fields = ['id', 'component', 'quantity']
-
-
-
-class MaterialRequisitionSerializer(serializers.ModelSerializer):
-    items = MaterialRequisitionItemSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = MaterialRequisition
-        fields = ['id', 'manufacturing_order', 'created_at', 'updated_at', 'items']
 
 
 class ManufacturingOrderSerializer(serializers.ModelSerializer):

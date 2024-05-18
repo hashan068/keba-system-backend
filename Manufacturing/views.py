@@ -7,6 +7,7 @@ from .models import ManufacturingOrder, MaterialRequisition, BillOfMaterial, BOM
 from .serializers import ManufacturingOrderSerializer, MaterialRequisitionSerializer, BillOfMaterialSerializer, BOMItemSerializer
 from Sales.models import SalesOrderItem
 from Inventory.models import Component
+from .utils import get_bom_id_for_product
 
 
 class MaterialRequisitionViewSet(viewsets.ModelViewSet):
@@ -16,23 +17,21 @@ class MaterialRequisitionViewSet(viewsets.ModelViewSet):
 
 
 class BillOfMaterialViewSet(viewsets.ModelViewSet):
-    serializer_class = BillOfMaterialSerializer
     queryset = BillOfMaterial.objects.all()
+    serializer_class = BillOfMaterialSerializer
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-
         if serializer.is_valid():
-            bill_of_material = serializer.save()
+            bom = serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            print(serializer.errors)  # Add this line to print serializer errors
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class BOMItemViewSet(viewsets.ModelViewSet):
     queryset = BOMItem.objects.all()
     serializer_class = BOMItemSerializer
+
 
 class ManufacturingOrderViewSet(viewsets.ModelViewSet):
     queryset = ManufacturingOrder.objects.all()
@@ -40,13 +39,20 @@ class ManufacturingOrderViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        print(f"Request data: {request.data}")
         if serializer.is_valid():
-            manufacturing_order = serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            product_id = request.data.get('product_id')
+            bom_id = get_bom_id_for_product(product_id)
+            
+            if bom_id:
+                validated_data = serializer.validated_data
+                validated_data['bom_id'] = bom_id
+                
+                manufacturing_order = ManufacturingOrder.objects.create(**validated_data)
+                return Response(ManufacturingOrderSerializer(manufacturing_order).data, status=status.HTTP_201_CREATED)
+            else:
+                return Response({"error": "No BOM found for the given product"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 # class ManufacturingOrderViewSet(viewsets.ModelViewSet):
 #     queryset = ManufacturingOrder.objects.all()
 #     serializer_class = ManufacturingOrderSerializer
@@ -55,10 +61,12 @@ class ManufacturingOrderViewSet(viewsets.ModelViewSet):
 #         serializer = self.get_serializer(data=request.data)
 #         print(f"Request data: {request.data}")
 #         if serializer.is_valid():
-#             SalesOrderItem = serializer.save()
+#             manufacturing_order = serializer.save()
 #             return Response(serializer.data, status=status.HTTP_201_CREATED)
 #         else:
 #             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
         
