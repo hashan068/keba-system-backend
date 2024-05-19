@@ -14,6 +14,12 @@ class MaterialRequisitionViewSet(viewsets.ModelViewSet):
     queryset = MaterialRequisition.objects.all()
     serializer_class = MaterialRequisitionSerializer
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            material_requisition = serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class BillOfMaterialViewSet(viewsets.ModelViewSet):
@@ -53,20 +59,5 @@ class ManufacturingOrderViewSet(viewsets.ModelViewSet):
                 return Response({"error": "No BOM found for the given product"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-# class ManufacturingOrderViewSet(viewsets.ModelViewSet):
-#     queryset = ManufacturingOrder.objects.all()
-#     serializer_class = ManufacturingOrderSerializer
 
-#     def create(self, request, *args, **kwargs):
-#         serializer = self.get_serializer(data=request.data)
-#         print(f"Request data: {request.data}")
-#         if serializer.is_valid():
-#             manufacturing_order = serializer.save()
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         else:
-#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-        
+      

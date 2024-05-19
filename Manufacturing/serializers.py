@@ -1,25 +1,60 @@
 # Serializers for Manufacturing app
 from rest_framework import serializers
 from .models import ManufacturingOrder, MaterialRequisition,MaterialRequisitionItem, BillOfMaterial, BOMItem
-from Inventory.models import Component, Supplier, PurchaseRequisition, PurchaseOrder, InventoryTransaction
+from Inventory.models import Component, Supplier, PurchaseRequisition, PurchaseOrder
 from Sales.models import SalesOrderItem
 from Inventory.serializers import ComponentSerializer
 from django.shortcuts import get_object_or_404
-
 
 class MaterialRequisitionItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = MaterialRequisitionItem
         fields = ['id', 'component', 'quantity']
-        
 
 class MaterialRequisitionSerializer(serializers.ModelSerializer):
     items = MaterialRequisitionItemSerializer(many=True, read_only=True)
 
     class Meta:
         model = MaterialRequisition
-        fields = ['id', 'manufacturing_order', 'created_at', 'updated_at', 'items']
+        fields = ['id', 'manufacturing_order', 'bom', 'created_at', 'updated_at', 'items']
 
+    def create(self, validated_data):
+        manufacturing_order = validated_data['manufacturing_order']
+        bom = validated_data.get('bom')
+
+        material_requisition = MaterialRequisition.objects.create(**validated_data)
+        items_data = []
+
+        if bom:
+            for bom_item in bom.bom_items.all():
+                quantity = manufacturing_order.quantity * bom_item.quantity
+                item_data = {
+                    'material_requisition': material_requisition,
+                    'component': bom_item.component,
+                    'quantity': quantity
+                }
+                items_data.append(item_data)
+                MaterialRequisitionItem.objects.create(**item_data)
+        
+        return material_requisition
+# class MaterialRequisitionItemSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = MaterialRequisitionItem
+#         fields = ['id', 'component', 'quantity']
+
+# class MaterialRequisitionSerializer(serializers.ModelSerializer):
+#     items = MaterialRequisitionItemSerializer(many=True)
+
+#     class Meta:
+#         model = MaterialRequisition
+#         fields = ['id', 'manufacturing_order', 'bom', 'created_at', 'updated_at', 'items']
+
+#     def create(self, validated_data):
+#         items_data = validated_data.pop('items')
+#         material_requisition = MaterialRequisition.objects.create(**validated_data)
+#         for item_data in items_data:
+#             MaterialRequisitionItem.objects.create(material_requisition=material_requisition, **item_data)
+#         return material_requisition
 
 class BOMItemSerializer(serializers.ModelSerializer):
     class Meta:

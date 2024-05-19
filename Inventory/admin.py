@@ -1,6 +1,5 @@
 from django.contrib import admin
-from .models import Component, PurchaseRequisition, MaterialRequisition, MaterialRequisitionItem, PurchaseOrder, InventoryTransaction, Supplier
-
+from .models import Supplier, Component, PurchaseRequisition, PurchaseOrder, ReplenishTransaction, ConsumptionTransaction
 
 # Custom admin class for Component model
 class ComponentAdmin(admin.ModelAdmin):
@@ -15,12 +14,10 @@ class PurchaseRequisitionAdmin(admin.ModelAdmin):
     search_fields = ('component__name', 'notes')
     list_filter = ('status', 'created_at', 'updated_at')
 
-
 # Register your models with the admin site
 admin.site.register(Component, ComponentAdmin)
 admin.site.register(PurchaseRequisition, PurchaseRequisitionAdmin)
-admin.site.register(MaterialRequisition)
-admin.site.register(MaterialRequisitionItem)
 admin.site.register(PurchaseOrder)
-admin.site.register(InventoryTransaction)
+admin.site.register(ReplenishTransaction)  # Corrected class name
+admin.site.register(ConsumptionTransaction)
 admin.site.register(Supplier)

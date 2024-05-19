@@ -31,14 +31,23 @@ class ManufacturingOrder(models.Model):
             return "Manufacturing Order with no associated Sales Order Item"
 
 
-
 class MaterialRequisition(models.Model):
+    STATUS_CHOICES = [
+        ('pending', _('Pending')),
+        ('approved', _('Approved')),
+        ('rejected', _('Rejected')),
+        ('fulfilled', _('Fulfilled')),
+    ]
+
     manufacturing_order = models.ForeignKey(ManufacturingOrder, on_delete=models.CASCADE, related_name='material_requisitions')
+    bom = models.ForeignKey('BillOfMaterial', on_delete=models.CASCADE, related_name='material_requisitions', null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"Material Requisition for {self.manufacturing_order}"
+
 
 class MaterialRequisitionItem(models.Model):
     material_requisition = models.ForeignKey(MaterialRequisition, on_delete=models.CASCADE, related_name='items')
@@ -52,16 +61,16 @@ class MaterialRequisitionItem(models.Model):
 class BillOfMaterial(models.Model):
     name = models.CharField(max_length=100)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='bill_of_material', null=True, blank=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
 
+
 class BOMItem(models.Model):
     bill_of_material = models.ForeignKey(BillOfMaterial, on_delete=models.CASCADE, related_name='bom_items')
-    component = models.ForeignKey(Component, on_delete=models.CASCADE, related_name='bom_items', null=True,default=1, blank=True)
+    component = models.ForeignKey(Component, on_delete=models.CASCADE, related_name='bom_items', null=True, default=1, blank=True)
     quantity = models.PositiveIntegerField()
 
     def __str__(self):

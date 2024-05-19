@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Component, PurchaseRequisition, MaterialRequisition, MaterialRequisitionItem, PurchaseOrder, InventoryTransaction, Supplier
+from .models import Component, PurchaseRequisition, PurchaseOrder, ReplenishTransaction, ConsumptionTransaction, Supplier
+from Manufacturing.models import MaterialRequisition
 
 class ComponentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -16,18 +17,6 @@ class PurchaseRequisitionSerializer(serializers.ModelSerializer):
         model = PurchaseRequisition
         fields = ('id', 'creator_id', 'component_id', 'component_name', 'quantity', 'status', 'notes', 'created_at', 'updated_at')
 
-class MaterialRequisitionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MaterialRequisition
-        fields = ('id', 'manufacturing_order_id', 'creator_id', 'status', 'notes', 'created_at', 'updated_at')
-
-class MaterialRequisitionItemSerializer(serializers.ModelSerializer):
-    component_name = serializers.ReadOnlyField(source='component.name')
-
-    class Meta:
-        model = MaterialRequisitionItem
-        fields = ('id', 'material_requisition_id', 'component_id', 'component_name', 'quantity')
-
 class PurchaseOrderSerializer(serializers.ModelSerializer):
     purchase_requisition_details = serializers.ReadOnlyField(source='purchase_requisition.__str__')
 
@@ -35,14 +24,23 @@ class PurchaseOrderSerializer(serializers.ModelSerializer):
         model = PurchaseOrder
         fields = ('id', 'creator_id', 'purchase_requisition_id', 'purchase_requisition_details', 'supplier_id', 'purchase_manager_approval', 'status', 'notes', 'created_at', 'updated_at')
 
-class InventoryTransactionSerializer(serializers.ModelSerializer):
-    component_name = serializers.ReadOnlyField(source='component.name')
-
-    class Meta:
-        model = InventoryTransaction
-        fields = ('id', 'component_id', 'component_name', 'quantity', 'transaction_type', 'related_document', 'timestamp')
-
 class SupplierSerializer(serializers.ModelSerializer):
     class Meta:
         model = Supplier
         fields = ('id', 'name', 'email', 'address', 'website', 'date_added', 'is_active', 'notes')
+
+class ReplenishTransactionSerializer(serializers.ModelSerializer):
+    component_name = serializers.ReadOnlyField(source='component.name')
+    user_name = serializers.ReadOnlyField(source='user.username')
+
+    class Meta:
+        model = ReplenishTransaction
+        fields = ('id', 'purchase_requisition', 'component', 'component_name', 'quantity', 'user', 'user_name', 'timestamp')
+
+class ConsumptionTransactionSerializer(serializers.ModelSerializer):
+    component_name = serializers.ReadOnlyField(source='component.name')
+    user_name = serializers.ReadOnlyField(source='user.username')
+
+    class Meta:
+        model = ConsumptionTransaction
+        fields = ('id', 'material_requisition', 'component', 'component_name', 'quantity', 'user', 'user_name', 'timestamp', 'cost')

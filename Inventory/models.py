@@ -12,6 +12,22 @@ def get_default_user():
 superuser = get_default_user()
 superuser_pk = superuser.pk if superuser else 1
 
+class Supplier(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField(default=None)
+    address = models.TextField(null=True, blank=True)
+    website = models.URLField(blank=True, null=True)
+    date_added = models.DateTimeField(auto_now_add=True, editable=False)
+    is_active = models.BooleanField(default=True)
+    notes = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ['name']
+        verbose_name_plural = 'Suppliers'
+
 class Component(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
@@ -60,12 +76,14 @@ class MaterialRequisition(models.Model):
     CREATED = 'created'
     PENDING = 'pending'
     APPROVED = 'approved'
+    FULFILLED = 'fulfilled'
     REJECTED = 'rejected'
     CANCELLED = 'cancelled'
     STATUS_CHOICES = [
         (CREATED, _('Created')),
         (PENDING, _('Pending')),
         (APPROVED, _('Approved')),
+        (FULFILLED, _('Fulfilled')),
         (REJECTED, _('Rejected')),
         (CANCELLED, _('Cancelled'))
     ]
@@ -128,44 +146,29 @@ class PurchaseOrder(models.Model):
     def __str__(self):
         return f"Purchase Order #{self.id} - {self.purchase_requisition.component} - {self.purchase_requisition.quantity} units"
 
-class InventoryTransaction(models.Model):
-    REPLENISH ='replenish'
-    CONSUMPTION = 'consumption'
-    SCRAPPING ='scrapping'
-    TRANSACTION_TYPES = [
-        (REPLENISH, _('Replenish')),
-        (CONSUMPTION, _('Consumption')),
-        (SCRAPPING, _('Scrapping'))
-    ]
-
+class ReplenishTransaction(models.Model):  # Corrected class name
+    purchase_requisition = models.ForeignKey('PurchaseRequisition', on_delete=models.CASCADE)
     component = models.ForeignKey('Component', on_delete=models.CASCADE)
-    quantity = models.IntegerField()
-    transaction_type = models.CharField(
-        max_length=20,
-        choices=TRANSACTION_TYPES,
-        default=REPLENISH
-    )
-    related_document = models.CharField(max_length=100, blank=True)
+    quantity = models.PositiveIntegerField()
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     timestamp = models.DateTimeField(default=timezone.now, editable=False)
 
     class Meta:
         ordering = ['-timestamp']
 
     def __str__(self):
-        return f"{self.get_transaction_type_display().capitalize()} of {self.quantity} {self.component} at {self.timestamp}"
+        return f"Replenish of {self.quantity} {self.component} at {self.timestamp}"
 
-class Supplier(models.Model):
-    name = models.CharField(max_length=100)
-    email = models.EmailField(default=None)
-    address = models.TextField(null=True, blank=True)
-    website = models.URLField(blank=True, null=True)
-    date_added = models.DateTimeField(auto_now_add=True, editable=False)
-    is_active = models.BooleanField(default=True)
-    notes = models.TextField(blank=True, null=True)
-
-    def __str__(self):
-        return self.name
+class ConsumptionTransaction(models.Model):
+    MaterialRequisition = models.ForeignKey('MaterialRequisition', on_delete=models.CASCADE)
+    component = models.ForeignKey('Component', on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    timestamp = models.DateTimeField(default=timezone.now, editable=False)
+    cost = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
 
     class Meta:
-        ordering = ['name']
-        verbose_name_plural = 'Suppliers'
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return f"Consumption of {self.quantity} {self.component} at {self.timestamp}"
