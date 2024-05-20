@@ -16,7 +16,7 @@ class MaterialRequisitionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MaterialRequisition
-        fields = ['id', 'manufacturing_order', 'bom', 'created_at', 'updated_at', 'items']
+        fields = ['id', 'manufacturing_order', 'bom', 'status', 'created_at', 'updated_at', 'items']
 
     def create(self, validated_data):
         manufacturing_order = validated_data['manufacturing_order']
@@ -37,24 +37,7 @@ class MaterialRequisitionSerializer(serializers.ModelSerializer):
                 MaterialRequisitionItem.objects.create(**item_data)
         
         return material_requisition
-# class MaterialRequisitionItemSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = MaterialRequisitionItem
-#         fields = ['id', 'component', 'quantity']
 
-# class MaterialRequisitionSerializer(serializers.ModelSerializer):
-#     items = MaterialRequisitionItemSerializer(many=True)
-
-#     class Meta:
-#         model = MaterialRequisition
-#         fields = ['id', 'manufacturing_order', 'bom', 'created_at', 'updated_at', 'items']
-
-#     def create(self, validated_data):
-#         items_data = validated_data.pop('items')
-#         material_requisition = MaterialRequisition.objects.create(**validated_data)
-#         for item_data in items_data:
-#             MaterialRequisitionItem.objects.create(material_requisition=material_requisition, **item_data)
-#         return material_requisition
 
 class BOMItemSerializer(serializers.ModelSerializer):
     class Meta:

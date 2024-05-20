@@ -28,12 +28,6 @@ class QuotationItemViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
-        
-# def generate_unique_quotation_number():
-#     # Your logic to generate a unique quotation number goes here.
-#     # For example, you can use the highest existing quotation number and increment it by 1.
-#     pass
-
 
 class QuotationViewSet(viewsets.ModelViewSet):
     queryset = Quotation.objects.all()

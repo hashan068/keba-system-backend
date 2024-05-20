@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Component, PurchaseRequisition, PurchaseOrder, ReplenishTransaction, ConsumptionTransaction, Supplier
 from Manufacturing.models import MaterialRequisition
+from django.utils.translation import gettext_lazy as _
 
 class ComponentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -43,4 +44,4 @@ class ConsumptionTransactionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ConsumptionTransaction
-        fields = ('id', 'material_requisition', 'component', 'component_name', 'quantity', 'user', 'user_name', 'timestamp', 'cost')
+        fields = ('id', 'material_requisition_item', 'component', 'component_name', 'quantity', 'user', 'user_name', 'timestamp', 'cost')

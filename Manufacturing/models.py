@@ -3,6 +3,7 @@ from django.utils.translation import gettext_lazy as _
 from Sales.models import SalesOrderItem, Product
 from Inventory.models import Component
 from django.utils import timezone
+from django.contrib.auth import get_user_model
 
 
 class ManufacturingOrder(models.Model):

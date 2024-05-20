@@ -8,7 +8,8 @@ from .serializers import ManufacturingOrderSerializer, MaterialRequisitionSerial
 from Sales.models import SalesOrderItem
 from Inventory.models import Component
 from .utils import get_bom_id_for_product
-
+from rest_framework.decorators import action
+from Inventory.models import ConsumptionTransaction
 
 class MaterialRequisitionViewSet(viewsets.ModelViewSet):
     queryset = MaterialRequisition.objects.all()

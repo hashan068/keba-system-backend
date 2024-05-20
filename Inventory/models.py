@@ -160,7 +160,7 @@ class ReplenishTransaction(models.Model):  # Corrected class name
         return f"Replenish of {self.quantity} {self.component} at {self.timestamp}"
 
 class ConsumptionTransaction(models.Model):
-    MaterialRequisition = models.ForeignKey('MaterialRequisition', on_delete=models.CASCADE)
+    material_requisition_item = models.ForeignKey('MaterialRequisitionItem', on_delete=models.CASCADE)
     component = models.ForeignKey('Component', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
