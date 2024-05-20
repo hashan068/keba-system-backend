@@ -65,6 +65,7 @@ class QuotationSerializer(serializers.ModelSerializer):
         total_amount = sum(item['quantity'] * item['unit_price'] for item in quotation_items_data)
         validated_data['total_amount'] = total_amount
 
+
         quotation = Quotation.objects.create(**validated_data)
         for quotation_item_data in quotation_items_data:
             QuotationItem.objects.create(quotation=quotation, **quotation_item_data)

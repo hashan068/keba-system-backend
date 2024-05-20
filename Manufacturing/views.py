@@ -17,6 +17,8 @@ class MaterialRequisitionViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
+        current_user = request.user
+        print (current_user.id)
         if serializer.is_valid():
             material_requisition = serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
