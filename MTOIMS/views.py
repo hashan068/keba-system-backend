@@ -1,11 +1,10 @@
 # views.py
 from djoser.views import UserViewSet
-from .serializers import CustomUserSerializer
 
-class CustomUserViewSet(UserViewSet):
-    serializer_class = CustomUserSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import CustomTokenObtainPairSerializer
 
-    def get_serializer_class(self):
-        if self.action == 'me':
-            return CustomUserSerializer
-        return super().get_serializer_class()
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer

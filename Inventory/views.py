@@ -1,10 +1,12 @@
 from rest_framework import viewsets
-from .models import Component, PurchaseRequisition, PurchaseOrder, ReplenishTransaction, ConsumptionTransaction, Supplier
-from .serializers import ComponentSerializer, PurchaseRequisitionSerializer, PurchaseOrderSerializer,  SupplierSerializer, ReplenishTransactionSerializer, ConsumptionTransactionSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import action
 from django.contrib.auth import get_user_model
+from .models import Component, PurchaseRequisition, PurchaseOrder, ReplenishTransaction, ConsumptionTransaction, Supplier
+
+from .serializers import ComponentSerializer, PurchaseRequisitionSerializer, PurchaseOrderSerializer,  SupplierSerializer, ReplenishTransactionSerializer, ConsumptionTransactionSerializer
+from Manufacturing.models import MaterialRequisitionItem
 
 class ComponentViewSet(viewsets.ModelViewSet):
     queryset = Component.objects.all()
@@ -47,8 +49,17 @@ class ConsumptionTransactionViewSet(viewsets.ModelViewSet):
     serializer_class = ConsumptionTransactionSerializer
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        print("Received request data:", request.data)  # Print request data for debugging
+        
+        serializer = self.get_serializer(data=request.data, many=isinstance(request.data, list))
+        
         if serializer.is_valid():
-            serializer.save()
+            print("Serializer is valid, data:", serializer.validated_data)  # Print validated data for debugging
+            self.perform_create(serializer)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            print("Serializer is not valid, errors:", serializer.errors)  # Print errors for debugging
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def perform_create(self, serializer):
+        serializer.save()

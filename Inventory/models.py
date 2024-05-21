@@ -1,16 +1,18 @@
+# Inventory app models.py
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 
-User = get_user_model()
+# User = get_user_model()
 
-def get_default_user():
-    return User.objects.filter(is_superuser=True).first()
+# def get_default_user():
+#     return User.objects.filter(is_superuser=True).first()
 
-superuser = get_default_user()
-superuser_pk = superuser.pk if superuser else 1
+# superuser = get_default_user()
+# superuser_pk = superuser.pk if superuser else 1
 
 class Supplier(models.Model):
     name = models.CharField(max_length=100)
@@ -54,7 +56,7 @@ class PurchaseRequisition(models.Model):
         (CANCELLED, _('Cancelled'))
     ]
 
-    creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=get_default_user)
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     component = models.ForeignKey('Component', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     status = models.CharField(
@@ -72,46 +74,6 @@ class PurchaseRequisition(models.Model):
     def __str__(self):
         return f"Purchase Requisition #{self.id} - {self.component} - {self.quantity} units"
 
-class MaterialRequisition(models.Model):
-    CREATED = 'created'
-    PENDING = 'pending'
-    APPROVED = 'approved'
-    FULFILLED = 'fulfilled'
-    REJECTED = 'rejected'
-    CANCELLED = 'cancelled'
-    STATUS_CHOICES = [
-        (CREATED, _('Created')),
-        (PENDING, _('Pending')),
-        (APPROVED, _('Approved')),
-        (FULFILLED, _('Fulfilled')),
-        (REJECTED, _('Rejected')),
-        (CANCELLED, _('Cancelled'))
-    ]
-
-    manufacturing_order = models.ForeignKey('Manufacturing.ManufacturingOrder', on_delete=models.CASCADE)
-    creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=get_default_user)
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default=CREATED
-    )
-    notes = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return f"Material Requisition #{self.id} - {self.manufacturing_order}"
-
-class MaterialRequisitionItem(models.Model):
-    material_requisition = models.ForeignKey('MaterialRequisition', on_delete=models.CASCADE)
-    component = models.ForeignKey('Component', on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField()
-
-    def __str__(self):
-        return f"{self.quantity} units of {self.component} for {self.material_requisition}"
 
 class PurchaseOrder(models.Model):
     CREATED = 'created'
@@ -160,12 +122,11 @@ class ReplenishTransaction(models.Model):  # Corrected class name
         return f"Replenish of {self.quantity} {self.component} at {self.timestamp}"
 
 class ConsumptionTransaction(models.Model):
-    material_requisition_item = models.ForeignKey('MaterialRequisitionItem', on_delete=models.CASCADE)
-    component = models.ForeignKey('Component', on_delete=models.CASCADE)
+    material_requisition_item = models.ForeignKey('Manufacturing.MaterialRequisitionItem', on_delete=models.CASCADE)
+    component_id = models.ForeignKey('Inventory.Component', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    user_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     timestamp = models.DateTimeField(default=timezone.now, editable=False)
-    cost = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
 
     class Meta:
         ordering = ['-timestamp']

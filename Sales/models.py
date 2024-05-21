@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+
 from django.utils.translation import gettext_lazy as _
 
 class Customer(models.Model):
@@ -46,6 +47,8 @@ class RFQItem(models.Model):
     def __str__(self):
         return f"{self.product.name} - {self.quantity} x {self.unit_price}"
 
+
+
 class Quotation(models.Model):
     STATUS_CHOICES = [
         ('quotation', 'Quotation'),
@@ -64,12 +67,14 @@ class Quotation(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name='created_quotations')
 
     class Meta:
         ordering = ['-created_at']
 
     def __str__(self):
         return f"Quotation #{self.pk} for {self.customer.name}"
+
 
 class QuotationItem(models.Model):
     quotation = models.ForeignKey(Quotation, on_delete=models.CASCADE, related_name='quotation_items')

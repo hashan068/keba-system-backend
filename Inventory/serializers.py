@@ -1,7 +1,11 @@
 from rest_framework import serializers
 from .models import Component, PurchaseRequisition, PurchaseOrder, ReplenishTransaction, ConsumptionTransaction, Supplier
-from Manufacturing.models import MaterialRequisition
+
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 class ComponentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -38,10 +42,19 @@ class ReplenishTransactionSerializer(serializers.ModelSerializer):
         model = ReplenishTransaction
         fields = ('id', 'purchase_requisition', 'component', 'component_name', 'quantity', 'user', 'user_name', 'timestamp')
 
+
 class ConsumptionTransactionSerializer(serializers.ModelSerializer):
     component_name = serializers.ReadOnlyField(source='component.name')
     user_name = serializers.ReadOnlyField(source='user.username')
 
     class Meta:
         model = ConsumptionTransaction
-        fields = ('id', 'material_requisition_item', 'component', 'component_name', 'quantity', 'user', 'user_name', 'timestamp', 'cost')
+        fields = ('id', 'material_requisition_item', 'component_id', 'component_name', 'quantity', 'user_id', 'user_name', 'timestamp')
+
+    def create(self, validated_data):
+        if isinstance(validated_data, list):
+            consumption_transactions = [
+                ConsumptionTransaction(**item) for item in validated_data
+            ]
+            return ConsumptionTransaction.objects.bulk_create(consumption_transactions)
+        return ConsumptionTransaction.objects.create(**validated_data)
