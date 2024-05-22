@@ -10,9 +10,13 @@ from django.contrib.auth import get_user_model
 class ManufacturingOrder(models.Model):
     STATUS_CHOICES = [
         ('pending', _('Pending')),
-        ('in_progress', _('In Progress')),
+        ('mr_sent', _('MR_Sent')),
+        ('mr_approved', _('MR Approved')),
+        ('mr_rejected', _('MR Rejected')),
+        ('in_production', _('In Production')),
         ('completed', _('Completed')),
         ('cancelled', _('Cancelled')),
+        
     ]
 
     sales_order_item = models.ForeignKey(SalesOrderItem, on_delete=models.CASCADE, related_name='manufacturing_orders', null=True, blank=True)

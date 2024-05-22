@@ -6,12 +6,17 @@ from django.shortcuts import get_object_or_404
 def get_material_requisition_serializer():
     from Manufacturing.serializers import MaterialRequisitionSerializer
     return MaterialRequisitionSerializer
+  
+def get_manufacturing_order_serializer():
+    from Manufacturing.serializers import ManufacturingOrderSerializer
+    return ManufacturingOrderSerializer
 
 @transaction.atomic
 def create_consumption_transaction(validated_data):
     consumption_transaction = ConsumptionTransaction.objects.create(**validated_data)
     update_component_quantity(consumption_transaction.component_id.id, consumption_transaction.quantity)
     update_material_requisition_status(consumption_transaction.material_requisition_item.material_requisition)
+    update_manufacturing_order_status(consumption_transaction.material_requisition_item.material_requisition.manufacturing_order)
     return consumption_transaction
 
 @transaction.atomic
@@ -28,3 +33,13 @@ def update_material_requisition_status(material_requisition):
         serializer.save()
     else:
         raise Exception(f"Failed to update MaterialRequisition status: {serializer.errors}")
+
+@transaction.atomic
+def update_manufacturing_order_status(manufacturing_order):
+
+    ManufacturingOrderSerializer = get_manufacturing_order_serializer()
+    serializer = ManufacturingOrderSerializer(manufacturing_order, data={'status': 'mr_approved'}, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+    else:
+        raise Exception(f"Failed to update Manaufacturing Order status: {serializer.errors}")
