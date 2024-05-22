@@ -10,9 +10,13 @@ from django.contrib.auth import get_user_model
 class ManufacturingOrder(models.Model):
     STATUS_CHOICES = [
         ('pending', _('Pending')),
-        ('in_progress', _('In Progress')),
+        ('mr_sent', _('MR_Sent')),
+        ('mr_approved', _('MR Approved')),
+        ('mr_rejected', _('MR Rejected')),
+        ('in_production', _('In Production')),
         ('completed', _('Completed')),
         ('cancelled', _('Cancelled')),
+        
     ]
 
     sales_order_item = models.ForeignKey(SalesOrderItem, on_delete=models.CASCADE, related_name='manufacturing_orders', null=True, blank=True)
@@ -46,6 +50,9 @@ class MaterialRequisition(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
 
     def __str__(self):
         return f"Material Requisition for {self.manufacturing_order}"

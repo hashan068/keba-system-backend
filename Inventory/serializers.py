@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Component, PurchaseRequisition, PurchaseOrder, ReplenishTransaction, ConsumptionTransaction, Supplier
 from django.db import transaction
+from .utils import create_consumption_transaction
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
@@ -10,7 +11,7 @@ User = get_user_model()
 class ComponentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Component
-        fields = ('id', 'name', 'description', 'quantity', 'reorder_level', 'unit_of_measure', 'supplier_id', 'cost')
+        fields = ('id', 'name', 'description', 'quantity','reorder_quantity', 'reorder_level', 'unit_of_measure', 'supplier_id', 'cost')
 
     def create(self, validated_data):
         return Component.objects.create(**validated_data)
@@ -20,7 +21,7 @@ class PurchaseRequisitionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PurchaseRequisition
-        fields = ('id', 'creator_id', 'component_id', 'component_name', 'quantity', 'status', 'notes', 'created_at', 'updated_at')
+        fields = ('id', 'user_id', 'component_id', 'component_name', 'quantity', 'status', 'notes', 'created_at', 'updated_at')
 
 class PurchaseOrderSerializer(serializers.ModelSerializer):
     purchase_requisition_details = serializers.ReadOnlyField(source='purchase_requisition.__str__')
@@ -62,18 +63,6 @@ class ConsumptionTransactionSerializer(serializers.ModelSerializer):
             return consumption_transactions
 
         return create_consumption_transaction(validated_data)
-
-@transaction.atomic
-def create_consumption_transaction(validated_data):
-    consumption_transaction = ConsumptionTransaction.objects.create(**validated_data)
-    update_component_quantity(consumption_transaction.component_id.id, consumption_transaction.quantity)
-    return consumption_transaction
-
-@transaction.atomic
-def update_component_quantity(component_id, quantity):
-    component = get_object_or_404(Component, id=component_id)
-    component.quantity -= quantity  # Reduce the component quantity by the consumed amount
-    component.save()
 
 
 
