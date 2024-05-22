@@ -11,7 +11,7 @@ User = get_user_model()
 class ComponentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Component
-        fields = ('id', 'name', 'description', 'quantity', 'reorder_level', 'unit_of_measure', 'supplier_id', 'cost')
+        fields = ('id', 'name', 'description', 'quantity','reorder_quantity', 'reorder_level', 'unit_of_measure', 'supplier_id', 'cost')
 
     def create(self, validated_data):
         return Component.objects.create(**validated_data)
@@ -21,7 +21,7 @@ class PurchaseRequisitionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PurchaseRequisition
-        fields = ('id', 'creator_id', 'component_id', 'component_name', 'quantity', 'status', 'notes', 'created_at', 'updated_at')
+        fields = ('id', 'user_id', 'component_id', 'component_name', 'quantity', 'status', 'notes', 'created_at', 'updated_at')
 
 class PurchaseOrderSerializer(serializers.ModelSerializer):
     purchase_requisition_details = serializers.ReadOnlyField(source='purchase_requisition.__str__')

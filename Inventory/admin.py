@@ -1,4 +1,3 @@
-# Inventory app admin.py
 from django.contrib import admin
 from .models import Supplier, Component, PurchaseRequisition, PurchaseOrder, ReplenishTransaction, ConsumptionTransaction
 
@@ -31,14 +30,18 @@ class PurchaseOrderAdmin(admin.ModelAdmin):
 
 # Custom admin class for ReplenishTransaction model
 class ReplenishTransactionAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'user', 'timestamp')
-    search_fields = ('user__username', 'component__name')
+    list_display = ('__str__', 'get_user_display', 'timestamp')
+    search_fields = ('component__name', 'user_id__username')
     list_filter = ('timestamp',)
     ordering = ('-timestamp',)
 
+    @admin.display(description='user')
+    def get_user_display(self, obj):
+        return obj.user_id
+
 # Custom admin class for ConsumptionTransaction model
 class ConsumptionTransactionAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'material_requisition_item', 'component_id', 'quantity', 'user_id', 'timestamp')
+    list_display = ('__str__', 'material_requisition_item', 'component_id', 'quantity', 'timestamp')
     search_fields = ('material_requisition_item__name', 'component_id__name', 'user_id__username')
     list_filter = ('timestamp',)
     ordering = ('-timestamp',)

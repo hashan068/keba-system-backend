@@ -24,6 +24,15 @@ class ComponentViewSet(viewsets.ModelViewSet):
 class PurchaseRequisitionViewSet(viewsets.ModelViewSet):
     queryset = PurchaseRequisition.objects.all()
     serializer_class = PurchaseRequisitionSerializer
+    
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        print(f"Request data: {request.data}")
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class PurchaseOrderViewSet(viewsets.ModelViewSet):
     queryset = PurchaseOrder.objects.all()
@@ -44,7 +53,7 @@ class ReplenishTransactionViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        
+
 class ConsumptionTransactionViewSet(viewsets.ModelViewSet):
     queryset = ConsumptionTransaction.objects.all()
     serializer_class = ConsumptionTransactionSerializer
