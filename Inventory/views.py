@@ -44,22 +44,33 @@ class ReplenishTransactionViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+        
 class ConsumptionTransactionViewSet(viewsets.ModelViewSet):
     queryset = ConsumptionTransaction.objects.all()
     serializer_class = ConsumptionTransactionSerializer
 
     def create(self, request, *args, **kwargs):
-        print("Received request data:", request.data)  # Print request data for debugging
-        
         serializer = self.get_serializer(data=request.data, many=isinstance(request.data, list))
-        
         if serializer.is_valid():
-            print("Serializer is valid, data:", serializer.validated_data)  # Print validated data for debugging
-            self.perform_create(serializer)
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            print("Serializer is not valid, errors:", serializer.errors)  # Print errors for debugging
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+# class ConsumptionTransactionViewSet(viewsets.ModelViewSet):
+#     queryset = ConsumptionTransaction.objects.all()
+#     serializer_class = ConsumptionTransactionSerializer
 
-    def perform_create(self, serializer):
-        serializer.save()
+#     def create(self, request, *args, **kwargs):
+#         print("Received request data:", request.data)  # Print request data for debugging
+        
+#         serializer = self.get_serializer(data=request.data, many=isinstance(request.data, list))
+        
+#         if serializer.is_valid():
+#             print("Serializer is valid, data:", serializer.validated_data)  # Print validated data for debugging
+#             self.perform_create(serializer)
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         else:
+#             print("Serializer is not valid, errors:", serializer.errors)  # Print errors for debugging
+#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#     def perform_create(self, serializer):
+#         serializer.save()
