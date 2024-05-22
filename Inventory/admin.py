@@ -1,5 +1,13 @@
+# Inventory app admin.py
 from django.contrib import admin
 from .models import Supplier, Component, PurchaseRequisition, PurchaseOrder, ReplenishTransaction, ConsumptionTransaction
+
+# Custom admin class for Supplier model
+class SupplierAdmin(admin.ModelAdmin):
+    list_display = ('name', 'email', 'is_active')
+    search_fields = ('name', 'email')
+    list_filter = ('is_active',)
+    ordering = ('name',)
 
 # Custom admin class for Component model
 class ComponentAdmin(admin.ModelAdmin):
@@ -14,10 +22,31 @@ class PurchaseRequisitionAdmin(admin.ModelAdmin):
     search_fields = ('component__name', 'notes')
     list_filter = ('status', 'created_at', 'updated_at')
 
+# Custom admin class for PurchaseOrder model
+class PurchaseOrderAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'creator', 'status', 'created_at', 'updated_at')
+    search_fields = ('creator__username', 'purchase_requisition__component__name', 'notes')
+    list_filter = ('status', 'created_at', 'updated_at')
+    ordering = ('-created_at',)
+
+# Custom admin class for ReplenishTransaction model
+class ReplenishTransactionAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'user', 'timestamp')
+    search_fields = ('user__username', 'component__name')
+    list_filter = ('timestamp',)
+    ordering = ('-timestamp',)
+
+# Custom admin class for ConsumptionTransaction model
+class ConsumptionTransactionAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'material_requisition_item', 'component_id', 'quantity', 'user_id', 'timestamp')
+    search_fields = ('material_requisition_item__name', 'component_id__name', 'user_id__username')
+    list_filter = ('timestamp',)
+    ordering = ('-timestamp',)
+
 # Register your models with the admin site
+admin.site.register(Supplier, SupplierAdmin)
 admin.site.register(Component, ComponentAdmin)
 admin.site.register(PurchaseRequisition, PurchaseRequisitionAdmin)
-admin.site.register(PurchaseOrder)
-admin.site.register(ReplenishTransaction)  # Corrected class name
-admin.site.register(ConsumptionTransaction)
-admin.site.register(Supplier)
+admin.site.register(PurchaseOrder, PurchaseOrderAdmin)
+admin.site.register(ReplenishTransaction, ReplenishTransactionAdmin)
+admin.site.register(ConsumptionTransaction, ConsumptionTransactionAdmin)

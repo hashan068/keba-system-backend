@@ -132,4 +132,4 @@ class ConsumptionTransaction(models.Model):
         ordering = ['-timestamp']
 
     def __str__(self):
-        return f"Consumption of {self.quantity} {self.component} at {self.timestamp}"
+        return f"Consumption of {self.quantity} {self.component_id.name} at {self.timestamp}"
