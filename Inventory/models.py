@@ -63,7 +63,6 @@ class PurchaseRequisition(models.Model):
         ('low', _('Low')),
     ]
 
-    # Fields
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     component = models.ForeignKey('Component', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
