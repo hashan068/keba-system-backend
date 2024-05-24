@@ -25,8 +25,6 @@ class ProductSerializer(serializers.ModelSerializer):
             return "Not Available"
 
 
-
-
 class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer

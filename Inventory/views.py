@@ -29,10 +29,13 @@ class PurchaseRequisitionViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         print(f"Request data: {request.data}")
+
         if serializer.is_valid():
+            print("Serializer is valid")
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
+            print("Serializer errors:", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class PurchaseOrderViewSet(viewsets.ModelViewSet):
