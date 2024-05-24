@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from django.contrib.auth import get_user_model
 from .models import Component, PurchaseRequisition, PurchaseOrder, ReplenishTransaction, ConsumptionTransaction, Supplier
+from django.db import transaction
 
 from .serializers import ComponentSerializer, PurchaseRequisitionSerializer, PurchaseOrderSerializer,  SupplierSerializer, ReplenishTransactionSerializer, ConsumptionTransactionSerializer
 from Manufacturing.models import MaterialRequisitionItem
@@ -28,10 +29,13 @@ class PurchaseRequisitionViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         print(f"Request data: {request.data}")
+
         if serializer.is_valid():
+            print("Serializer is valid")
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
+            print("Serializer errors:", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class PurchaseOrderViewSet(viewsets.ModelViewSet):
@@ -53,17 +57,32 @@ class ReplenishTransactionViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
 class ConsumptionTransactionViewSet(viewsets.ModelViewSet):
     queryset = ConsumptionTransaction.objects.all()
     serializer_class = ConsumptionTransactionSerializer
 
+    @transaction.atomic
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data, many=isinstance(request.data, list))
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            try:
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# class ConsumptionTransactionViewSet(viewsets.ModelViewSet):
+#     queryset = ConsumptionTransaction.objects.all()
+#     serializer_class = ConsumptionTransactionSerializer
+
+#     @transaction.atomic
+#     def create(self, request, *args, **kwargs):
+#         serializer = self.get_serializer(data=request.data, many=isinstance(request.data, list))
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 # class ConsumptionTransactionViewSet(viewsets.ModelViewSet):
 #     queryset = ConsumptionTransaction.objects.all()
 #     serializer_class = ConsumptionTransactionSerializer

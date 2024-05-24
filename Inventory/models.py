@@ -63,9 +63,8 @@ class PurchaseRequisition(models.Model):
         ('low', _('Low')),
     ]
 
-    # Fields
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
-    component = models.ForeignKey('Component', on_delete=models.CASCADE)
+    component = models.ForeignKey(Component, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='created')
     notes = models.TextField(blank=True)
