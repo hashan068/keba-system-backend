@@ -5,6 +5,7 @@ from Inventory.models import Component, Supplier, PurchaseRequisition, PurchaseO
 from Sales.models import SalesOrderItem
 from Inventory.serializers import ComponentSerializer
 from django.shortcuts import get_object_or_404
+from django.db import transaction
 
 class MaterialRequisitionItemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -18,6 +19,7 @@ class MaterialRequisitionSerializer(serializers.ModelSerializer):
         model = MaterialRequisition
         fields = ['id', 'manufacturing_order', 'bom', 'status', 'created_at', 'updated_at', 'items']
 
+    @transaction.atomic
     def create(self, validated_data):
         manufacturing_order = validated_data['manufacturing_order']
         bom = validated_data.get('bom')
@@ -35,6 +37,9 @@ class MaterialRequisitionSerializer(serializers.ModelSerializer):
                 }
                 items_data.append(item_data)
                 MaterialRequisitionItem.objects.create(**item_data)
+
+        # Update the manufacturing order status to 'mr_sent'
+        manufacturing_order.update_status('mr_sent')
         
         return material_requisition
 
