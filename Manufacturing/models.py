@@ -40,6 +40,7 @@ class ManufacturingOrder(models.Model):
 class MaterialRequisition(models.Model):
     STATUS_CHOICES = [
         ('pending', _('Pending')),
+
         ('approved', _('Approved')),
         ('rejected', _('Rejected')),
         ('fulfilled', _('Fulfilled')),

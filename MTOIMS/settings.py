@@ -35,7 +35,10 @@ INSTALLED_APPS = [
     'Sales',
     'Manufacturing',
     'Inventory',
+    'Notifications',
     'corsheaders',
+    
+
 ]
 
 MIDDLEWARE = [
@@ -111,7 +114,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Colombo' 
 
 USE_I18N = True
 
