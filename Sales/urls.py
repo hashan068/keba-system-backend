@@ -1,4 +1,3 @@
-# sales/urls.py
 from django.urls import path, include
 from rest_framework import routers
 from . import views
@@ -18,4 +17,5 @@ router.register(r'quotation-items', views.QuotationItemViewSet, basename='quotat
 urlpatterns = [
     # Include the API endpoints in the URL patterns
     path('', include(router.urls)),
+    path('quotations/<int:pk>/send-email/', views.send_quotation_email, name='send-quotation-email'),
 ]

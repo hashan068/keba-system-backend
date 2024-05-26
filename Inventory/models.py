@@ -59,14 +59,11 @@ class Component(models.Model):
 class PurchaseRequisition(models.Model):
     # Define choices for status
     STATUS_CHOICES = [
-        ('created', _('Created')),
         ('pending', _('Pending')),
         ('approved', _('Approved')),
         ('rejected', _('Rejected')),
         ('cancelled', _('Cancelled')),
-        ('partially_fulfilled', _('Partially Fulfilled')),
         ('fulfilled', _('Fulfilled')),
-        ('closed', _('Closed')),
     ]
 
     # Define choices for priority

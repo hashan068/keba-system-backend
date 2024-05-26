@@ -5,37 +5,53 @@ from .serializers import CustomerSerializer, ProductSerializer,RFQSerializer, RF
 import requests
 from django.http import JsonResponse
 from django.conf import settings
+from django.urls import path, include
+from rest_framework import routers
+from . import views
+from rest_framework.decorators import api_view
 
-def send_simple_message(to_email, subject, text):
-    return requests.post(
-        f"https://api.mailgun.net/v3/{settings.MAILGUN_DOMAIN}/messages",
-        auth=("api", settings.MAILGUN_API_KEY),
-        data={
-            "from": f"Excited User <mailgun@{settings.MAILGUN_DOMAIN}>",
-            "to": [to_email],
-            "subject": subject,
-            "text": text,
-        }
-    )
+import requests
 
-def send_quotation_email(request, quotation_id):
+@api_view(['POST'])
+def send_quotation_email(request, pk):
     try:
-        # Fetch the quotation details (assuming you have a model named Quotation)
-        quotation = Quotation.objects.get(id=quotation_id)
-        to_email = quotation.customer.email
-        subject = f"Quotation #{quotation.quotation_number}"
-        text = f"Dear {quotation.customer.name},\n\nPlease find your quotation details below:\n\nQuotation Number: {quotation.quotation_number}\nTotal Amount: {quotation.total_amount}\n\nThank you!"
-        
-        response = send_simple_message(to_email, subject, text)
-        
+        quotation = Quotation.objects.get(pk=pk)
+        print(f"Quotation instance: {quotation}")
+
+        recipient_email = quotation.customer.email
+        print(f"Recipient email: {recipient_email}")
+
+        subject = f"Quotation #{quotation.id}"
+        print(f"Subject: {subject}")
+
+        text = f"Dear {quotation.customer.name},\n\nPlease find your quotation details below:\n\n{QuotationSerializer(quotation).data['quotation_items']}"
+        print(f"Email text: {text}")
+
+        response = requests.post(
+            f"https://api.mailgun.net/v3/{settings.MAILGUN_DOMAIN}/messages",
+            auth=("api", settings.MAILGUN_API_KEY),
+            data={
+                "from": f"Your Company <mailgun@{settings.MAILGUN_DOMAIN}>",
+                "to": [recipient_email],
+                "subject": subject,
+                "text": text,
+            },
+        )
+        print(requests.post)
+        print(f"Mailgun response status code: {response.status_code}")
+        print(f"Mailgun response content: {response.content}")
+
         if response.status_code == 200:
-            return JsonResponse({'message': 'Email sent successfully!'}, status=200)
+            return Response({"message": "Email sent successfully!"}, status=status.HTTP_200_OK)
         else:
-            return JsonResponse({'error': 'Error sending email'}, status=500)
+            return Response({"error": "Failed to send email"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     except Quotation.DoesNotExist:
-        return JsonResponse({'error': 'Quotation not found'}, status=404)
+        return Response({"error": "Quotation not found"}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+        print(f"Exception: {e}")
+        logger.error(f"Error sending quotation email: {e}")
+        return Response({"error": "An error occurred while sending the email"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class CustomerViewSet(viewsets.ModelViewSet):
     queryset = Customer.objects.all()

@@ -22,7 +22,7 @@ class PurchaseRequisitionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PurchaseRequisition
-        fields = ('id', 'component_id', 'quantity', 'notes', 'priority')
+        fields = ('id', 'component_id', 'quantity', 'notes', 'priority', 'status', 'created_at')
 
     def create(self, validated_data):
         component_data = validated_data.pop('component')
