@@ -3,6 +3,10 @@ from .models import ManufacturingOrder, MaterialRequisition, BillOfMaterial, BOM
 
 # Register your models here.
 
+class BOMItemInline(admin.TabularInline):
+    model = BOMItem
+    extra = 0
+
 class MaterialRequisitionItemInline(admin.TabularInline):
     model = MaterialRequisitionItem
     extra = 0
@@ -13,10 +17,6 @@ class MaterialRequisitionAdmin(admin.ModelAdmin):
     list_filter = ('status',)
     search_fields = ('manufacturing_order__id',)
 
-class BOMItemInline(admin.TabularInline):
-    model = BOMItem
-    extra = 0
-
 class BillOfMaterialAdmin(admin.ModelAdmin):
     inlines = [BOMItemInline]
     list_display = ('name', 'product', 'created_at', 'updated_at')
@@ -25,3 +25,4 @@ class BillOfMaterialAdmin(admin.ModelAdmin):
 admin.site.register(ManufacturingOrder)
 admin.site.register(MaterialRequisition, MaterialRequisitionAdmin)
 admin.site.register(BillOfMaterial, BillOfMaterialAdmin)
+admin.site.register(BOMItem)
