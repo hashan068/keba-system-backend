@@ -138,6 +138,7 @@ class ConsumptionTransaction(models.Model):
     user_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     timestamp = models.DateTimeField(default=timezone.now, editable=False)
 
+
     class Meta:
         ordering = ['-timestamp']
 

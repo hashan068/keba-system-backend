@@ -14,28 +14,15 @@ def get_manufacturing_order_serializer():
     return ManufacturingOrderSerializer
 
 
-def create_consumption_transaction(validated_data):
-    component_id = validated_data['component_id'].id
-    quantity = validated_data['quantity']
-
-    component = get_object_or_404(Component, id=component_id)
-
-    if component.quantity < quantity:
-        raise Exception(f"Insufficient quantity for component {component.name}. Available quantity: {component.quantity}")
-
-    consumption_transaction = ConsumptionTransaction.objects.create(**validated_data)
-
-    update_component_quantity(component_id, quantity)
-    update_material_requisition_status(consumption_transaction.material_requisition_item.material_requisition)
-    update_manufacturing_order_status(consumption_transaction.material_requisition_item.material_requisition.manufacturing_order)
-
-    return consumption_transaction
-
-
 def update_component_quantity(component_id, quantity):
     component = get_object_or_404(Component, id=component_id)
+    if component.quantity < quantity:
+        raise Exception(f"Insufficient quantity for component {component.name}. Available quantity: {component.quantity}")
     component.quantity -= quantity  # Reduce the component quantity by the consumed amount
     component.save()
+    
+
+
 
 
 def update_material_requisition_status(material_requisition):

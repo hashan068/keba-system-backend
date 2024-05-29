@@ -1,11 +1,13 @@
 from rest_framework import serializers
 from .models import Component, PurchaseRequisition, PurchaseOrder, ReplenishTransaction, ConsumptionTransaction, Supplier
 from django.db import transaction
-from .utils import create_consumption_transaction
+
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
+from .utils import update_component_quantity
+
 User = get_user_model()
 
 class ComponentSerializer(serializers.ModelSerializer):
@@ -59,54 +61,5 @@ class ConsumptionTransactionSerializer(serializers.ModelSerializer):
         model = ConsumptionTransaction
         fields = ('id', 'material_requisition_item', 'component_id', 'component_name', 'quantity', 'user_id', 'user_name', 'timestamp')
 
-    @transaction.atomic
-    def create(self, validated_data):
-        if isinstance(validated_data, list):
-            consumption_transactions = []
-            try:
-                with transaction.atomic():
-                    for item in validated_data:
-                        consumption_transaction = create_consumption_transaction(item)
-                        consumption_transactions.append(consumption_transaction)
-                return consumption_transactions
-            except Exception as e:
-                raise serializers.ValidationError(f"Transaction failed: {str(e)}")
-
-        return create_consumption_transaction(validated_data)
 
 
-# class ConsumptionTransactionSerializer(serializers.ModelSerializer):
-#     component_name = serializers.ReadOnlyField(source='component_id.name')
-#     user_name = serializers.ReadOnlyField(source='user_id.username')
-
-#     class Meta:
-#         model = ConsumptionTransaction
-#         fields = ('id', 'material_requisition_item', 'component_id', 'component_name', 'quantity', 'user_id', 'user_name', 'timestamp')
-
-#     @transaction.atomic
-#     def create(self, validated_data):
-#         if isinstance(validated_data, list):
-#             consumption_transactions = [
-#                 create_consumption_transaction(item) for item in validated_data
-#             ]
-#             return consumption_transactions
-
-#         return create_consumption_transaction(validated_data)
-
-
-
-# class ConsumptionTransactionSerializer(serializers.ModelSerializer):
-#     component_name = serializers.ReadOnlyField(source='component.name')
-#     user_name = serializers.ReadOnlyField(source='user.username')
-
-#     class Meta:
-#         model = ConsumptionTransaction
-#         fields = ('id', 'material_requisition_item', 'component_id', 'component_name', 'quantity', 'user_id', 'user_name', 'timestamp')
-
-#     def create(self, validated_data):
-#         if isinstance(validated_data, list):
-#             consumption_transactions = [
-#                 ConsumptionTransaction(**item) for item in validated_data
-#             ]
-#             return ConsumptionTransaction.objects.bulk_create(consumption_transactions)
-#         return ConsumptionTransaction.objects.create(**validated_data)
