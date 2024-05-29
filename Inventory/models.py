@@ -37,6 +37,7 @@ class Component(models.Model):
     quantity = models.PositiveIntegerField(default=0)
     reorder_level = models.PositiveIntegerField(default=0)
     reorder_quantity = models.PositiveIntegerField(default=0)
+    order_quantity = models.PositiveIntegerField(default=0)
     unit_of_measure = models.CharField(max_length=20, default='pcs')
     supplier = models.ForeignKey('Supplier', on_delete=models.CASCADE, null=True, blank=True)
     cost = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
@@ -45,7 +46,7 @@ class Component(models.Model):
         return self.name
 
     def check_inventory(self):
-        if self.quantity < self.reorder_level:
+        if self.quantity < self.reorder_level and self.order_quantity == 0:
             self.notify_low_inventory()
 
     def notify_low_inventory(self):
