@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
+from Notifications.models import Notification
 
 User = get_user_model()
 
@@ -43,17 +44,26 @@ class Component(models.Model):
     def __str__(self):
         return self.name
 
+    def check_inventory(self):
+        if self.quantity < self.reorder_level:
+            self.notify_low_inventory()
+
+    def notify_low_inventory(self):
+        user = get_default_user()
+        Notification.objects.create(
+            user=user,
+            message=f"Inventory level for {self.name} is below the reorder level."
+    )
+
+
 class PurchaseRequisition(models.Model):
     # Define choices for status
     STATUS_CHOICES = [
-        ('created', _('Created')),
         ('pending', _('Pending')),
         ('approved', _('Approved')),
         ('rejected', _('Rejected')),
         ('cancelled', _('Cancelled')),
-        ('partially_fulfilled', _('Partially Fulfilled')),
         ('fulfilled', _('Fulfilled')),
-        ('closed', _('Closed')),
     ]
 
     # Define choices for priority

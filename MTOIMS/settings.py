@@ -1,5 +1,5 @@
 import os
-
+from decouple import config
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -15,6 +15,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+
+
+MAILGUN_API_KEY = config('MAILGUN_API_KEY')
+MAILGUN_DOMAIN = config('MAILGUN_DOMAIN')
 
 
 
@@ -35,7 +39,10 @@ INSTALLED_APPS = [
     'Sales',
     'Manufacturing',
     'Inventory',
+    'Notifications',
     'corsheaders',
+    
+
 ]
 
 MIDDLEWARE = [
@@ -111,7 +118,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Colombo' 
 
 USE_I18N = True
 

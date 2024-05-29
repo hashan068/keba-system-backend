@@ -7,3 +7,4 @@ def get_bom_id_for_product(product_id):
         return bom.id
     except BillOfMaterial.DoesNotExist:
         return None
+

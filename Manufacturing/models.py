@@ -27,6 +27,10 @@ class ManufacturingOrder(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def update_status(self, new_status):
+        self.status = new_status
+        self.save()
+
     class Meta:
         ordering = ['-created_at']
 
@@ -40,6 +44,7 @@ class ManufacturingOrder(models.Model):
 class MaterialRequisition(models.Model):
     STATUS_CHOICES = [
         ('pending', _('Pending')),
+
         ('approved', _('Approved')),
         ('rejected', _('Rejected')),
         ('fulfilled', _('Fulfilled')),
@@ -59,9 +64,15 @@ class MaterialRequisition(models.Model):
 
 
 class MaterialRequisitionItem(models.Model):
+    STATUS_CHOICES = [
+        ('pending', _('Pending')),
+        ('approved', _('Approved')),
+    ]
+
     material_requisition = models.ForeignKey(MaterialRequisition, on_delete=models.CASCADE, related_name='items')
     component = models.ForeignKey(Component, on_delete=models.CASCADE, related_name='material_requisition_items')
     quantity = models.PositiveIntegerField()
+    status = models.CharField(max_length=20, choices=MaterialRequisition.STATUS_CHOICES, default='pending')
 
     def __str__(self):
         return f"{self.quantity} x {self.component} for Material Requisition {self.material_requisition}"

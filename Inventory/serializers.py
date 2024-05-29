@@ -22,7 +22,7 @@ class PurchaseRequisitionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PurchaseRequisition
-        fields = ('id', 'component_id', 'quantity', 'notes', 'priority')
+        fields = ('id', 'component_id', 'quantity', 'notes', 'priority', 'status', 'created_at')
 
     def create(self, validated_data):
         component_data = validated_data.pop('component')
@@ -51,8 +51,6 @@ class ReplenishTransactionSerializer(serializers.ModelSerializer):
         fields = ('id', 'purchase_requisition', 'component', 'component_name', 'quantity', 'user', 'user_name', 'timestamp')
 
 
-
-
 class ConsumptionTransactionSerializer(serializers.ModelSerializer):
     component_name = serializers.ReadOnlyField(source='component_id.name')
     user_name = serializers.ReadOnlyField(source='user_id.username')
@@ -64,12 +62,36 @@ class ConsumptionTransactionSerializer(serializers.ModelSerializer):
     @transaction.atomic
     def create(self, validated_data):
         if isinstance(validated_data, list):
-            consumption_transactions = [
-                create_consumption_transaction(item) for item in validated_data
-            ]
-            return consumption_transactions
+            consumption_transactions = []
+            try:
+                with transaction.atomic():
+                    for item in validated_data:
+                        consumption_transaction = create_consumption_transaction(item)
+                        consumption_transactions.append(consumption_transaction)
+                return consumption_transactions
+            except Exception as e:
+                raise serializers.ValidationError(f"Transaction failed: {str(e)}")
 
         return create_consumption_transaction(validated_data)
+
+
+# class ConsumptionTransactionSerializer(serializers.ModelSerializer):
+#     component_name = serializers.ReadOnlyField(source='component_id.name')
+#     user_name = serializers.ReadOnlyField(source='user_id.username')
+
+#     class Meta:
+#         model = ConsumptionTransaction
+#         fields = ('id', 'material_requisition_item', 'component_id', 'component_name', 'quantity', 'user_id', 'user_name', 'timestamp')
+
+#     @transaction.atomic
+#     def create(self, validated_data):
+#         if isinstance(validated_data, list):
+#             consumption_transactions = [
+#                 create_consumption_transaction(item) for item in validated_data
+#             ]
+#             return consumption_transactions
+
+#         return create_consumption_transaction(validated_data)
 
 
 
