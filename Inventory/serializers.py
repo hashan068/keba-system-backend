@@ -61,5 +61,29 @@ class ConsumptionTransactionSerializer(serializers.ModelSerializer):
         model = ConsumptionTransaction
         fields = ('id', 'material_requisition_item', 'component_id', 'component_name', 'quantity', 'user_id', 'user_name', 'timestamp')
 
+    def validate(self, data):
+        component_id = data['component_id'].id
+        quantity = data['quantity']
+        component = get_object_or_404(Component, id=component_id)
+
+        if component.quantity < quantity:
+            # create purchase requsition for the component
+            purchase_requisition = PurchaseRequisition.objects.create(component=component, quantity=component.order_quantity, priority='high', status='pending')
+
+            raise serializers.ValidationError(f"Insufficient quantity for component {component.name}. Available quantity: {component.quantity}")
+
+        return data
+
+    def create(self, validated_data):
+        try:
+            with transaction.atomic():
+                component_id = validated_data['component_id'].id
+                quantity = validated_data['quantity']
+                update_component_quantity(component_id, quantity)
+                consumption_transaction = ConsumptionTransaction.objects.create(**validated_data)
+                return consumption_transaction
+        except Exception as e:
+            raise serializers.ValidationError(str(e))
+
 
 

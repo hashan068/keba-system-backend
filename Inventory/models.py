@@ -84,6 +84,9 @@ class PurchaseRequisition(models.Model):
     expected_delivery_date = models.DateTimeField(blank=True, null=True)
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='high')
 
+    class Meta:
+        ordering = ['-created_at']
+
 class PurchaseOrder(models.Model):
     CREATED = 'created'
     PENDING = 'pending'

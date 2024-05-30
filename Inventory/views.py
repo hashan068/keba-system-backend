@@ -71,22 +71,12 @@ class ConsumptionTransactionViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             print("Serializer is valid")
             try:
-                with transaction.atomic():
-                    component_id = serializer.validated_data['component_id'].id
-                    quantity = serializer.validated_data['quantity']
-                    component = get_object_or_404(Component, id=component_id)
-
-                    try:
-                        update_component_quantity(component_id, quantity)
-                    except Exception as e:
-                        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-                    consumption_transaction = serializer.save()
-
-                    # update_material_requisition_status(consumption_transaction.material_requisition_item.material_requisition)
-                    # update_manufacturing_order_status(consumption_transaction.material_requisition_item.material_requisition.manufacturing_order)
-
+                consumption_transaction = serializer.save()
+                # update_material_requisition_status(consumption_transaction.material_requisition_item.material_requisition)
+                # update_manufacturing_order_status(consumption_transaction.material_requisition_item.material_requisition.manufacturing_order)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except serializers.ValidationError as e:
+                return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
             except Exception as e:
                 print(f"An exception occurred: {str(e)}")
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
