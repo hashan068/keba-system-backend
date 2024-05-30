@@ -7,6 +7,7 @@ class SupplierAdmin(admin.ModelAdmin):
     search_fields = ('name', 'email')
     list_filter = ('is_active',)
     ordering = ('name',)
+    list_per_page = 10 
 
 # Custom admin class for Component model
 class ComponentAdmin(admin.ModelAdmin):
@@ -14,12 +15,14 @@ class ComponentAdmin(admin.ModelAdmin):
     search_fields = ('name', 'description', 'unit_of_measure', 'supplier__name')
     list_filter = ('unit_of_measure', 'supplier')
     ordering = ('name',)
+    list_per_page = 10
 
 # Custom admin class for PurchaseRequisition model
 class PurchaseRequisitionAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'component', 'quantity', 'status', 'created_at', 'updated_at')
     search_fields = ('component__name', 'notes')
     list_filter = ('status', 'created_at', 'updated_at')
+    list_per_page = 10
 
 # Custom admin class for PurchaseOrder model
 class PurchaseOrderAdmin(admin.ModelAdmin):
@@ -27,6 +30,7 @@ class PurchaseOrderAdmin(admin.ModelAdmin):
     search_fields = ('creator__username', 'purchase_requisition__component__name', 'notes')
     list_filter = ('status', 'created_at', 'updated_at')
     ordering = ('-created_at',)
+    list_per_page = 10
 
 # Custom admin class for ReplenishTransaction model
 class ReplenishTransactionAdmin(admin.ModelAdmin):
@@ -34,6 +38,7 @@ class ReplenishTransactionAdmin(admin.ModelAdmin):
     search_fields = ('component__name', 'user_id__username')
     list_filter = ('timestamp',)
     ordering = ('-timestamp',)
+    list_per_page = 10
 
     @admin.display(description='user')
     def get_user_display(self, obj):
@@ -45,6 +50,7 @@ class ConsumptionTransactionAdmin(admin.ModelAdmin):
     search_fields = ('material_requisition_item__name', 'component_id__name', 'user_id__username')
     list_filter = ('timestamp',)
     ordering = ('-timestamp',)
+    list_per_page = 10
 
 # Register your models with the admin site
 admin.site.register(Supplier, SupplierAdmin)
