@@ -10,7 +10,7 @@ from django.db import transaction
 class MaterialRequisitionItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = MaterialRequisitionItem
-        fields = ['id', 'component', 'quantity']
+        fields = ['id', 'component', 'quantity', 'status']
 
 class MaterialRequisitionSerializer(serializers.ModelSerializer):
     items = MaterialRequisitionItemSerializer(many=True, read_only=True)
