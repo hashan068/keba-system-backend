@@ -6,4 +6,4 @@ class ManufacturingConfig(AppConfig):
     name = 'Manufacturing'
 
     def ready(self):
-        pass
+        import Manufacturing.signals
