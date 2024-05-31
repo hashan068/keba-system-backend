@@ -86,6 +86,7 @@ class PurchaseRequisition(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        # ordering = ['priority', 'status']
 
 class PurchaseOrder(models.Model):
     CREATED = 'created'
