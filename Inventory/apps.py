@@ -6,4 +6,4 @@ class InventoryConfig(AppConfig):
     name = 'Inventory'
 
     def ready(self):
-        pass
+        import Inventory.signals
