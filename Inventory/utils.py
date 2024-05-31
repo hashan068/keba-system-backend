@@ -13,6 +13,9 @@ def get_manufacturing_order_serializer():
     from Manufacturing.serializers import ManufacturingOrderSerializer
     return ManufacturingOrderSerializer
 
+def get_material_requisition_item_serializer():
+    from Manufacturing.serializers import MaterialRequisitionItemSerializer
+    return MaterialRequisitionItemSerializer
 
 def update_component_quantity(component_id, quantity):
     component = get_object_or_404(Component, id=component_id)
@@ -22,7 +25,16 @@ def update_component_quantity(component_id, quantity):
     component.save()
     
 
+# update material_requisition item status
+def update_material_requisition_item_status(material_requisition_item):
+    MaterialRequisitionItemSerializer = get_material_requisition_item_serializer()
+    serializer = MaterialRequisitionItemSerializer(material_requisition_item, data={'status': 'approved'}, partial=True)
 
+    if serializer.is_valid():
+        serializer.save()
+        print(f"MaterialRequisitionItem status updated to approved")
+    else:
+        raise Exception(f"Failed to update MaterialRequisitionItem status: {serializer.errors}")
 
 
 def update_material_requisition_status(material_requisition):

@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
-from .utils import update_component_quantity
+from .utils import update_component_quantity, update_material_requisition_item_status
 
 User = get_user_model()
 
@@ -81,6 +81,9 @@ class ConsumptionTransactionSerializer(serializers.ModelSerializer):
                 quantity = validated_data['quantity']
                 update_component_quantity(component_id, quantity)
                 consumption_transaction = ConsumptionTransaction.objects.create(**validated_data)
+                # update material_requisition item status
+                update_material_requisition_item_status(consumption_transaction.material_requisition_item)
+
                 return consumption_transaction
         except Exception as e:
             raise serializers.ValidationError(str(e))

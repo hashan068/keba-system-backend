@@ -5,6 +5,7 @@ from Inventory.models import Component
 from Sales.models import SalesOrderItem, Product
 from django.utils import timezone
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 
 
 class ManufacturingOrder(models.Model):
@@ -47,6 +48,7 @@ class MaterialRequisition(models.Model):
 
         ('approved', _('Approved')),
         ('rejected', _('Rejected')),
+        ('partialy_approved', _('Partially_Approved')),
         ('fulfilled', _('Fulfilled')),
     ]
 
@@ -55,6 +57,21 @@ class MaterialRequisition(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def update_status(self):
+        all_items = self.items.all()
+        approved_items = all_items.filter(status='approved')
+
+        if not all_items:
+            self.status = 'pending'
+        elif approved_items.count() == all_items.count():
+            self.status = 'approved'
+        elif approved_items.exists():
+            self.status = 'partialy_approved'
+        else:
+            self.status = 'pending'
+
+        self.save()
 
     class Meta:
         ordering = ['-created_at']
