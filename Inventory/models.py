@@ -89,17 +89,14 @@ class PurchaseRequisition(models.Model):
         # ordering = ['priority', 'status']
 
 class PurchaseOrder(models.Model):
-    CREATED = 'created'
-    PENDING = 'pending'
-    APPROVED = 'approved'
-    REJECTED ='rejected'
-    CANCELLED = 'cancelled'
     STATUS_CHOICES = [
-        (CREATED, _('Created')),
-        (PENDING, _('Pending')),
-        (APPROVED, _('Approved')),
-        (REJECTED, _('Rejected')),
-        (CANCELLED, _('Cancelled'))
+        ('draft', _('Draft')),
+        ('open_order', _('Open Order')),
+        ('approved', _('Approved')),
+        ('received', _('Received')),
+        ('invoiced', _('Invoiced')),
+        ('cancelled', _('Cancelled')),
+        ('rejected', _('Rejected')),
     ]
 
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, default=None)
@@ -107,11 +104,8 @@ class PurchaseOrder(models.Model):
     purchase_requisition = models.ForeignKey('PurchaseRequisition', on_delete=models.CASCADE)
     supplier = models.ForeignKey('Supplier', on_delete=models.SET_NULL, null=True, blank=True)
     purchase_manager_approval = models.BooleanField(default=False)
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default=CREATED
-    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    notes = models.TextField(blank=True)
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(default=timezone.now, editable=False)
     updated_at = models.DateTimeField(default=timezone.now, editable=False)
