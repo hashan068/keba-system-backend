@@ -13,6 +13,6 @@ def create_purchase_order(sender, instance, created, **kwargs):
             creator=User.objects.filter(is_superuser=True).first(),
             purchase_requisition=instance,
             supplier=instance.component.supplier,
-            status='pending'
+            status='draft'
         )
         print(f'Purchase Order {purchase_order.id} created for Requisition {instance.id}')

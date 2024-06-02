@@ -52,7 +52,7 @@ class PurchaseOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PurchaseOrder
-        fields = ('id', 'creator_id', 'purchase_requisition_id', 'purchase_requisition', 'supplier_id', 'purchase_manager_approval', 'status', 'notes', 'created_at', 'updated_at')
+        fields = ('id', 'creator_id', 'purchase_requisition_id', 'purchase_requisition', 'supplier_id',  'status', 'notes', 'created_at', 'updated_at','price_per_unit', 'total_price' )
 
 class SupplierSerializer(serializers.ModelSerializer):
     class Meta:
