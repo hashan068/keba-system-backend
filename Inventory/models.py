@@ -9,14 +9,19 @@ from Notifications.models import Notification
 # from django.utils.text import slugify
 # import uuid
 
+# User = get_user_model()
+
+# def get_default_user():
+#     return User.objects.filter(is_superuser=True).first()
+
+# superuser = get_default_user()
+# superuser_pk = superuser.pk if superuser else 1
 User = get_user_model()
 
 def get_default_user():
+    # Lazy evaluation: Return a function to be called when needed
     return User.objects.filter(is_superuser=True).first()
-
-superuser = get_default_user()
-superuser_pk = superuser.pk if superuser else 1
-
+    
 class Supplier(models.Model):
     name = models.CharField(max_length=100)
     email = models.EmailField(default=None)
@@ -124,7 +129,7 @@ class PurchaseOrder(models.Model):
     created_at = models.DateTimeField(default=timezone.now, editable=False)
     updated_at = models.DateTimeField(default=timezone.now, editable=False)
 
-    price_per_unit = models.DecimalField(max_digits=10, decimal_places=2)
+    price_per_unit = models.DecimalField(max_digits=10, decimal_places=2,blank=True,)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, editable=False)
 
     class Meta:
