@@ -3,10 +3,15 @@ from .models import Customer, Product, Quotation, QuotationItem, SalesOrder, Sal
 
 # Custom admin class for Customer model
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ('name', 'email', 'phone', 'address')
-    search_fields = ('name', 'email', 'phone', 'address')
+    list_display = ('name', 'email', 'phone', 'full_address')
+    search_fields = ('name', 'email', 'phone', 'street_address', 'city', 'state', 'postal_code', 'country')
     ordering = ('name',)
     list_per_page = 10
+
+    def full_address(self, obj):
+        return f"{obj.street_address}, {obj.city}"
+    full_address.short_description = 'Address'
+
 
 # Custom admin class for RFQ model
 class RFQAdmin(admin.ModelAdmin):
