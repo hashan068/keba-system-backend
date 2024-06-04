@@ -12,6 +12,16 @@ class CustomerAdmin(admin.ModelAdmin):
         return f"{obj.street_address}, {obj.city}"
     full_address.short_description = 'Address'
 
+class ProductAdmin(admin.ModelAdmin):
+    list_display = (
+        'name', 'model_number', 'price', 'inverter_type', 'power_rating', 
+        'frequency', 'efficiency', 'surge_power', 'warranty_years',  
+        'input_voltage', 'output_voltage', 'created_at', 'updated_at'
+    )
+    search_fields = ('name', 'model_number', 'inverter_type')
+    list_filter = ('inverter_type', 'power_rating', 'frequency')
+    ordering = ('name',)
+    readonly_fields = ('created_at', 'updated_at')
 
 # Custom admin class for RFQ model
 class RFQAdmin(admin.ModelAdmin):

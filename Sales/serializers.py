@@ -5,12 +5,23 @@ from Manufacturing.serializers import BillOfMaterialSerializer
 from decimal import Decimal
 
 class ProductSerializer(serializers.ModelSerializer):
-    product_name = serializers.CharField(source='name')
+    product_name = serializers.SerializerMethodField()
     bom = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = ['id', 'product_name', 'description', 'price', 'bom']
+        fields = [
+            'id', 'product_name', 'description', 'price', 'inverter_type',
+            'power_rating', 'frequency', 'efficiency', 'surge_power',
+            'warranty_years', 'input_voltage', 'output_voltage',
+            'created_at', 'updated_at', 'bom'
+        ]
+        extra_kwargs = {
+            'name': {'read_only': True},  # Exclude the name field from validation
+        }
+
+    def get_product_name(self, obj):
+        return obj.name
 
     def get_bom(self, obj):
         try:
