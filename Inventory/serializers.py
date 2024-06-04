@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from .models import Component, PurchaseRequisition, PurchaseOrder, ReplenishTransaction, ConsumptionTransaction, Supplier
 from django.db import transaction
-
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
@@ -33,11 +32,27 @@ class PurchaseRequisitionSerializer(serializers.ModelSerializer):
         return purchase_requisition
 
 class PurchaseOrderSerializer(serializers.ModelSerializer):
-    purchase_requisition_details = serializers.ReadOnlyField(source='purchase_requisition.__str__')
+    purchase_requisition = PurchaseRequisitionSerializer(read_only=True)
+    purchase_requisition_id = serializers.PrimaryKeyRelatedField(
+        queryset=PurchaseRequisition.objects.all(),
+        source='purchase_requisition'
+    )
+    supplier_id = serializers.PrimaryKeyRelatedField(
+        queryset=Supplier.objects.all(),
+        source='supplier',
+        allow_null=True,
+        required=False
+    )
+    creator_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        source='creator',
+        allow_null=True,
+        required=False
+    )
 
     class Meta:
         model = PurchaseOrder
-        fields = ('id', 'creator_id', 'purchase_requisition_id', 'purchase_requisition_details', 'supplier_id', 'purchase_manager_approval', 'status', 'notes', 'created_at', 'updated_at')
+        fields = ('id', 'creator_id', 'purchase_requisition_id', 'purchase_requisition', 'supplier_id',  'status', 'notes', 'created_at', 'updated_at','price_per_unit', 'total_price' )
 
 class SupplierSerializer(serializers.ModelSerializer):
     class Meta:

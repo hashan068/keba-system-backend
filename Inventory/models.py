@@ -6,15 +6,22 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from Notifications.models import Notification
+# from django.utils.text import slugify
+# import uuid
 
+# User = get_user_model()
+
+# def get_default_user():
+#     return User.objects.filter(is_superuser=True).first()
+
+# superuser = get_default_user()
+# superuser_pk = superuser.pk if superuser else 1
 User = get_user_model()
 
 def get_default_user():
+    # Lazy evaluation: Return a function to be called when needed
     return User.objects.filter(is_superuser=True).first()
-
-superuser = get_default_user()
-superuser_pk = superuser.pk if superuser else 1
-
+    
 class Supplier(models.Model):
     name = models.CharField(max_length=100)
     email = models.EmailField(default=None)
@@ -34,6 +41,7 @@ class Supplier(models.Model):
 class Component(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
+    # sku = models.CharField(max_length=100, unique=True, blank=True)
     quantity = models.PositiveIntegerField(default=0)
     reorder_level = models.PositiveIntegerField(default=0)
     reorder_quantity = models.PositiveIntegerField(default=0)
@@ -44,6 +52,18 @@ class Component(models.Model):
 
     def __str__(self):
         return self.name
+
+    # def save(self, *args, **kwargs):
+    #     if not self.sku:
+    #         self.sku = self.generate_sku()
+    #     super(Component, self).save(*args, **kwargs)
+
+    # def generate_sku(self):
+    #     base_sku = slugify(self.name)[:10].upper()  # Shorten and capitalize the name for the SKU
+    #     reorder_level = str(self.reorder_level).zfill(3)  # Ensure reorder level is at least 3 digits
+    #     order_quantity = str(self.order_quantity).zfill(3)  # Ensure order quantity is at least 3 digits
+    #     unique_id = uuid.uuid4().hex[:4].upper()  # Generate a unique 4-character ID
+    #     return f"{base_sku}-RL{reorder_level}-OQ{order_quantity}-{unique_id}"
 
     def check_inventory(self):
         if self.quantity < self.reorder_level and self.order_quantity == 0:
@@ -89,38 +109,38 @@ class PurchaseRequisition(models.Model):
         # ordering = ['priority', 'status']
 
 class PurchaseOrder(models.Model):
-    CREATED = 'created'
-    PENDING = 'pending'
-    APPROVED = 'approved'
-    REJECTED ='rejected'
-    CANCELLED = 'cancelled'
     STATUS_CHOICES = [
-        (CREATED, _('Created')),
-        (PENDING, _('Pending')),
-        (APPROVED, _('Approved')),
-        (REJECTED, _('Rejected')),
-        (CANCELLED, _('Cancelled'))
+        ('draft', _('Draft')),
+        ('open_order', _('Open Order')),
+        ('approved', _('Approved')),
+        ('received', _('Received')),
+        ('invoiced', _('Invoiced')),
+        ('cancelled', _('Cancelled')),
+        ('rejected', _('Rejected')),
     ]
 
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, default=None)
     
     purchase_requisition = models.ForeignKey('PurchaseRequisition', on_delete=models.CASCADE)
     supplier = models.ForeignKey('Supplier', on_delete=models.SET_NULL, null=True, blank=True)
-    purchase_manager_approval = models.BooleanField(default=False)
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default=CREATED
-    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    notes = models.TextField(blank=True)
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(default=timezone.now, editable=False)
     updated_at = models.DateTimeField(default=timezone.now, editable=False)
+
+    price_per_unit = models.DecimalField(max_digits=10, decimal_places=2,blank=True,)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, editable=False)
 
     class Meta:
         ordering = ['-created_at']
 
     def __str__(self):
         return f"Purchase Order #{self.id} - {self.purchase_requisition.component} - {self.purchase_requisition.quantity} units"
+
+    def save(self, *args, **kwargs):
+        self.total_price = self.purchase_requisition.quantity * self.price_per_unit
+        super().save(*args, **kwargs)
 
 class ReplenishTransaction(models.Model):  # Corrected class name
     purchase_requisition = models.ForeignKey('PurchaseRequisition', on_delete=models.CASCADE)
