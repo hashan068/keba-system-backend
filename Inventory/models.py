@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from Notifications.models import Notification
 # from django.utils.text import slugify
 # import uuid
+from django.db.models import SET_DEFAULT, SET_NULL
 
 # User = get_user_model()
 
@@ -37,12 +38,20 @@ class Supplier(models.Model):
     class Meta:
         ordering = ['name']
         verbose_name_plural = 'Suppliers'
+        
+class Category(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
 
+    def __str__(self):
+        return self.name
+    
 class Component(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     # sku = models.CharField(max_length=100, unique=True, blank=True)
     quantity = models.PositiveIntegerField(default=0)
+    category = models.ForeignKey(Category, on_delete=SET_NULL, null=True, blank=True, related_name='components')
     reorder_level = models.PositiveIntegerField(default=0)
     reorder_quantity = models.PositiveIntegerField(default=0)
     order_quantity = models.PositiveIntegerField(default=0)

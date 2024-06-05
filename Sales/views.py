@@ -110,6 +110,8 @@ class SalesOrderViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
+            random_date = datetime(2023, random.randint(1, 12), random.randint(1, 28))
+            serializer.validated_data['created_at'] = random_date
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:

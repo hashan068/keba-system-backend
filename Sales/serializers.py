@@ -97,7 +97,7 @@ class SalesOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = SalesOrder
         fields = ['id', 'customer', 'customer_name', 'order_items', 'total_amount', 'status', 'created_at_date', 'updated_at']
-
+    
     def get_created_at_date(self, obj):
         return obj.created_at.date()
 

@@ -50,7 +50,7 @@ class ManufacturingOrderViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             product_id = request.data.get('product_id')
-            bom_id = get_bom_id_for_product(product_id)
+            bom_id = get_bom_id_for_product(product_id)       
             
             if bom_id:
                 validated_data = serializer.validated_data
