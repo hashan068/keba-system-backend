@@ -151,7 +151,7 @@ class PurchaseOrder(models.Model):
         self.total_price = self.purchase_requisition.quantity * self.price_per_unit
         super().save(*args, **kwargs)
 
-class ReplenishTransaction(models.Model):  # Corrected class name
+class ReplenishTransaction(models.Model): 
     purchase_requisition = models.ForeignKey('PurchaseRequisition', on_delete=models.CASCADE)
     component = models.ForeignKey('Component', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
@@ -163,6 +163,14 @@ class ReplenishTransaction(models.Model):  # Corrected class name
 
     def __str__(self):
         return f"Replenish of {self.quantity} {self.component} at {self.timestamp}"
+    
+    def save(self, *args, **kwargs):
+        # Update the quantity of the associated Component
+        self.component.quantity += self.quantity
+        self.component.save()
+
+        # Call the save method of the parent class
+        super().save(*args, **kwargs)
 
 class ConsumptionTransaction(models.Model):
     material_requisition_item = models.ForeignKey('Manufacturing.MaterialRequisitionItem', on_delete=models.CASCADE)
