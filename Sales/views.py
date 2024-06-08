@@ -1,3 +1,5 @@
+from datetime import datetime
+import random
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from .models import Customer, Product, RFQ, RFQItem, SalesOrder, SalesOrderItem, Quotation, QuotationItem
@@ -9,7 +11,7 @@ from django.urls import path, include
 from rest_framework import routers
 from . import views
 from rest_framework.decorators import api_view
-
+from datetime import timedelta
 import requests
 
 @api_view(['POST'])
@@ -106,12 +108,32 @@ class SalesOrderItemViewSet(viewsets.ModelViewSet):
 class SalesOrderViewSet(viewsets.ModelViewSet):
     queryset = SalesOrder.objects.all()
     serializer_class = SalesOrderSerializer
+    
+    def get_queryset(self):
+        queryset = SalesOrder.objects.all()
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+
+        if start_date and end_date:
+            queryset = queryset.filter(
+                created_at__date__range=[start_date, end_date]
+            )
+        elif start_date:
+            queryset = queryset.filter(
+                created_at__date__gte=start_date
+            )
+        elif end_date:
+            queryset = queryset.filter(
+                created_at__date__lte=end_date
+            )
+
+        return queryset
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            random_date = datetime(2023, random.randint(1, 12), random.randint(1, 28))
-            serializer.validated_data['created_at'] = random_date
+            # random_date = datetime(2023, random.randint(1, 12), random.randint(1, 28))
+            # serializer.validated_data['created_at'] = random_date
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
