@@ -14,10 +14,14 @@ class MaterialRequisitionItemSerializer(serializers.ModelSerializer):
 
 class MaterialRequisitionSerializer(serializers.ModelSerializer):
     items = MaterialRequisitionItemSerializer(many=True, read_only=True)
+    created_at_date = serializers.SerializerMethodField()
 
     class Meta:
         model = MaterialRequisition
-        fields = ['id', 'manufacturing_order', 'bom', 'status', 'created_at', 'updated_at', 'items']
+        fields = ['id', 'manufacturing_order', 'bom', 'status', 'created_at', 'updated_at','created_at_date', 'items']
+    
+    def get_created_at_date(self, obj):
+        return obj.created_at.date()
 
     @transaction.atomic
     def create(self, validated_data):
@@ -72,10 +76,12 @@ class BillOfMaterialSerializer(serializers.ModelSerializer):
 
 class ManufacturingOrderSerializer(serializers.ModelSerializer):
     sales_order_item = serializers.PrimaryKeyRelatedField(queryset=SalesOrderItem.objects.all(), required=False, allow_null=True)
+    product_name = serializers.CharField(source='product.name', read_only=True)
+    
 
     class Meta:
         model = ManufacturingOrder
-        fields = ['id', 'product_id', 'quantity', 'bom', 'status', 'created_at', 'updated_at', 'sales_order_item']
+        fields = ['id', 'product_id', 'quantity', 'bom', 'status', 'created_at', 'updated_at', 'sales_order_item', 'product_name', 'creater']
         read_only_fields = ['product_name']
 
     def create(self, validated_data):

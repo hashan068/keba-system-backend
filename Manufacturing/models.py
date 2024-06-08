@@ -6,7 +6,7 @@ from Sales.models import SalesOrderItem, Product
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.db.models import Q
-
+from django.conf import settings
 
 class ManufacturingOrder(models.Model):
     STATUS_CHOICES = [
@@ -25,6 +25,7 @@ class ManufacturingOrder(models.Model):
     quantity = models.PositiveIntegerField(default=1)
     bom = models.ForeignKey('BillOfMaterial', on_delete=models.CASCADE, related_name='manufacturing_orders', null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    creater = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

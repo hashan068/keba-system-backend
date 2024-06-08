@@ -1,5 +1,7 @@
 import os
 from decouple import config
+# Import default_headers
+from corsheaders.defaults import default_headers
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -61,6 +63,17 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000', 'http://localhost:5173',
 ]
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'X-User-ID',
+    'X-User-Role',
+]
+
+# Optionally, you can allow all headers with
+# CORS_ALLOW_ALL_HEADERS = True
+
+# Optionally, you can allow all origins with
+# CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'MTOIMS.urls'
 

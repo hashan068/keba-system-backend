@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from Notifications.models import Notification
 # from django.utils.text import slugify
 # import uuid
+from django.db.models import SET_DEFAULT, SET_NULL
 
 # User = get_user_model()
 
@@ -37,12 +38,20 @@ class Supplier(models.Model):
     class Meta:
         ordering = ['name']
         verbose_name_plural = 'Suppliers'
+        
+class Category(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
 
+    def __str__(self):
+        return self.name
+    
 class Component(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     # sku = models.CharField(max_length=100, unique=True, blank=True)
     quantity = models.PositiveIntegerField(default=0)
+    category = models.ForeignKey(Category, on_delete=SET_NULL, null=True, blank=True, related_name='components')
     reorder_level = models.PositiveIntegerField(default=0)
     reorder_quantity = models.PositiveIntegerField(default=0)
     order_quantity = models.PositiveIntegerField(default=0)
@@ -142,7 +151,7 @@ class PurchaseOrder(models.Model):
         self.total_price = self.purchase_requisition.quantity * self.price_per_unit
         super().save(*args, **kwargs)
 
-class ReplenishTransaction(models.Model):  # Corrected class name
+class ReplenishTransaction(models.Model): 
     purchase_requisition = models.ForeignKey('PurchaseRequisition', on_delete=models.CASCADE)
     component = models.ForeignKey('Component', on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
@@ -154,6 +163,14 @@ class ReplenishTransaction(models.Model):  # Corrected class name
 
     def __str__(self):
         return f"Replenish of {self.quantity} {self.component} at {self.timestamp}"
+    
+    def save(self, *args, **kwargs):
+        # Update the quantity of the associated Component
+        self.component.quantity += self.quantity
+        self.component.save()
+
+        # Call the save method of the parent class
+        super().save(*args, **kwargs)
 
 class ConsumptionTransaction(models.Model):
     material_requisition_item = models.ForeignKey('Manufacturing.MaterialRequisitionItem', on_delete=models.CASCADE)
