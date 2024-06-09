@@ -13,6 +13,7 @@ from . import views
 from rest_framework.decorators import api_view
 from datetime import timedelta
 import requests
+# from rest_framework.permissions import IsAuthenticated
 
 @api_view(['POST'])
 def send_quotation_email(request, pk):
@@ -108,6 +109,7 @@ class SalesOrderItemViewSet(viewsets.ModelViewSet):
 class SalesOrderViewSet(viewsets.ModelViewSet):
     queryset = SalesOrder.objects.all()
     serializer_class = SalesOrderSerializer
+    # permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
         queryset = SalesOrder.objects.all()

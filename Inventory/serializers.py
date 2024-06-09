@@ -20,11 +20,15 @@ class ComponentSerializer(serializers.ModelSerializer):
 
 class PurchaseRequisitionSerializer(serializers.ModelSerializer):
     component_id = serializers.PrimaryKeyRelatedField(queryset=Component.objects.all(), source='component')
+    component_name = serializers.SerializerMethodField()
     created_at_date = serializers.SerializerMethodField()
 
     class Meta:
         model = PurchaseRequisition
-        fields = ('id', 'component_id', 'quantity', 'notes', 'priority', 'status', 'created_at', 'created_at_date')
+        fields = ('id', 'component_id','component_name', 'quantity', 'notes', 'priority', 'status', 'created_at', 'created_at_date')
+    
+    def get_component_name(self, obj):
+        return obj.component.name
     
     def get_created_at_date(self, obj):
         return obj.created_at.date()

@@ -11,13 +11,12 @@ from django.conf import settings
 class ManufacturingOrder(models.Model):
     STATUS_CHOICES = [
         ('pending', _('Pending')),
-        ('mr_sent', _('MR_Sent')),
+        ('mr_sent', _('MR Sent')),
         ('mr_approved', _('MR Approved')),
         ('mr_rejected', _('MR Rejected')),
         ('in_production', _('In Production')),
         ('completed', _('Completed')),
         ('cancelled', _('Cancelled')),
-        
     ]
 
     sales_order_item = models.ForeignKey(SalesOrderItem, on_delete=models.CASCADE, related_name='manufacturing_orders', null=True, blank=True)
@@ -28,9 +27,22 @@ class ManufacturingOrder(models.Model):
     creater = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    end_at = models.DateTimeField(null=True, blank=True)
+    production_start_at = models.DateTimeField(null=True, blank=True)
+    estimated_mfg_lead_time = models.DurationField(null=True, blank=True)
+    mfg_lead_time = models.DurationField(null=True, blank=True)
+    production_lead_time = models.DurationField(null=True, blank=True)
 
     def update_status(self, new_status):
         self.status = new_status
+        if new_status == 'in_production':
+            self.production_start_at = timezone.now()
+        elif new_status == 'completed':
+            now = timezone.now()
+            self.mfg_lead_time = now - self.created_at
+            if self.production_start_at:
+                self.production_lead_time = now - self.production_start_at
+            self.end_at = now
         self.save()
 
     class Meta:
