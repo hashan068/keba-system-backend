@@ -47,3 +47,9 @@ python manage.py migrate
 Load data into PostgreSQL:
 python manage.py loaddata db.json
 By following these steps, you should successfully migrate your Django project's database from SQLite to PostgreSQL.
+
+# DATABASE_NAME=keba-db-aws
+# DATABASE_USER=postgres
+# DATABASE_PASSWORD=ukcDySFrdGJsvkzEDa6A
+# DATABASE_HOST=keba-db-aws.che86eewsnny.us-east-1.rds.amazonaws.com
+# DATABASE_PORT=5432

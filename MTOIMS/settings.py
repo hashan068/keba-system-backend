@@ -49,16 +49,6 @@ INSTALLED_APPS = [
 
 ]
 
-# MIDDLEWARE = [
-#     'django.middleware.security.SecurityMiddleware',
-#     'django.contrib.sessions.middleware.SessionMiddleware',
-#     'django.middleware.common.CommonMiddleware',
-#     'django.middleware.csrf.CsrfViewMiddleware',
-#     'django.contrib.auth.middleware.AuthenticationMiddleware',
-#     'django.contrib.messages.middleware.MessageMiddleware',
-#     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-#     'corsheaders.middleware.CorsMiddleware',
-# ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -79,11 +69,9 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
     'X-User-Role',
 ]
 
-# Optionally, you can allow all headers with
+# Optionally, Allow all headers with
 # CORS_ALLOW_ALL_HEADERS = True
 
-# Optionally, you can allow all origins with
-# CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'MTOIMS.urls'
 
@@ -120,11 +108,11 @@ WSGI_APPLICATION = 'MTOIMS.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'keba_pd_database',
-        'USER': 'postgres',
-        'PASSWORD': 'Keba@123',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': config('DATABASE_NAME'),
+        'USER': config('DATABASE_USER'),
+        'PASSWORD': config('DATABASE_PASSWORD'),
+        'HOST': config('DATABASE_HOST'),
+        'PORT': config('DATABASE_PORT'),
     }
 }
 
