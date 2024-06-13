@@ -53,7 +53,7 @@ def send_quotation_email(request, pk):
         return Response({"error": "Quotation not found"}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         print(f"Exception: {e}")
-        logger.error(f"Error sending quotation email: {e}")
+
         return Response({"error": "An error occurred while sending the email"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class CustomerViewSet(viewsets.ModelViewSet):

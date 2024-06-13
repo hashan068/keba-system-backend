@@ -66,6 +66,8 @@ class SupplierSerializer(serializers.ModelSerializer):
     class Meta:
         model = Supplier
         fields = ('id', 'name', 'email', 'address', 'website', 'date_added', 'is_active', 'notes')
+        
+
 
 class ReplenishTransactionSerializer(serializers.ModelSerializer):
     component_name = serializers.ReadOnlyField(source='component.name')
@@ -89,7 +91,7 @@ class ConsumptionTransactionSerializer(serializers.ModelSerializer):
         quantity = data['quantity']
         component = get_object_or_404(Component, id=component_id)
 
-        if component.quantity < quantity:
+        if component.quantity < quantity and component.order_quantity == 0:
             # create purchase requsition for the component
             purchase_requisition = PurchaseRequisition.objects.create(component=component, quantity=component.order_quantity, priority='high', status='pending')
 

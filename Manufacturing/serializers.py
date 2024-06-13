@@ -77,19 +77,20 @@ class BillOfMaterialSerializer(serializers.ModelSerializer):
 
 class ManufacturingOrderSerializer(serializers.ModelSerializer):
     sales_order_item = serializers.PrimaryKeyRelatedField(queryset=SalesOrderItem.objects.all(), required=False, allow_null=True)
-    product_name = serializers.CharField(source='product.name', read_only=True)
+    sales_order = serializers.PrimaryKeyRelatedField(queryset=SalesOrderItem.objects.all(), source='sales_order_item', required=False, allow_null=True)
     created_at_date = serializers.SerializerMethodField()
+    product_name = serializers.CharField(source='product_id.name', read_only=True)
     
     class Meta:
         model = ManufacturingOrder
         fields = [
-            'id', 'product_id', 'quantity', 'bom', 'status', 'created_at', 
-            'updated_at', 'end_at', 'production_start_at', 
-            'estimated_mfg_lead_time', 'mfg_lead_time', 'production_lead_time', 
-            'sales_order_item', 'product_name', 'creater', 'created_at_date'
+            'id','sales_order', 'product_id','product_name', 'quantity', 'bom', 'status', 'created_at',
+            'updated_at', 'end_at', 'production_start_at',
+            'estimated_mfg_lead_time', 'mfg_lead_time', 'production_lead_time',
+            'sales_order_item', 'creater', 'created_at_date'
         ]
         read_only_fields = [
-            'product_name', 'created_at', 'updated_at', 
+            'created_at', 'updated_at',
             'end_at', 'production_start_at', 'mfg_lead_time', 'production_lead_time'
         ]    
     
