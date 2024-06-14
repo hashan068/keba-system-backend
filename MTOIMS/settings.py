@@ -17,11 +17,12 @@ SECRET_KEY = config('SECRET_KEY')
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+# ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 MAILGUN_API_KEY = config('MAILGUN_API_KEY')
 MAILGUN_DOMAIN = config('MAILGUN_DOMAIN')
+
 
 
 
@@ -51,14 +52,13 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # Place this before CommonMiddleware
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
-
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000', 'http://localhost:5173',
@@ -69,11 +69,9 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
     'X-User-Role',
 ]
 
-# Optionally, you can allow all headers with
+# Optionally, Allow all headers with
 # CORS_ALLOW_ALL_HEADERS = True
 
-# Optionally, you can allow all origins with
-# CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'MTOIMS.urls'
 
@@ -110,24 +108,15 @@ WSGI_APPLICATION = 'MTOIMS.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'keba_pd_database',
-        'USER': 'postgres',
-        'PASSWORD': 'Keba@123',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': config('DATABASE_NAME'),
+        'USER': config('DATABASE_USER'),
+        'PASSWORD': config('DATABASE_PASSWORD'),
+        'HOST': config('DATABASE_HOST'),
+        'PORT': config('DATABASE_PORT'),
     }
 }
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': config('DATABASE_NAME'),
-#         'USER': config('DATABASE_USER'),
-#         'PASSWORD': config('DATABASE_PASSWORD'),
-#         'HOST': config('DATABASE_HOST', default='localhost'),
-#         'PORT': config('DATABASE_PORT', default='5432'),
-#     }
-# }
+
 
 
 
@@ -176,8 +165,12 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication'
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
     ],
 }
 

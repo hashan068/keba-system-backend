@@ -20,11 +20,15 @@ class ComponentSerializer(serializers.ModelSerializer):
 
 class PurchaseRequisitionSerializer(serializers.ModelSerializer):
     component_id = serializers.PrimaryKeyRelatedField(queryset=Component.objects.all(), source='component')
+    component_name = serializers.SerializerMethodField()
     created_at_date = serializers.SerializerMethodField()
 
     class Meta:
         model = PurchaseRequisition
-        fields = ('id', 'component_id', 'quantity', 'notes', 'priority', 'status', 'created_at', 'created_at_date')
+        fields = ('id', 'component_id','component_name', 'quantity', 'notes', 'priority', 'status', 'created_at', 'created_at_date')
+    
+    def get_component_name(self, obj):
+        return obj.component.name
     
     def get_created_at_date(self, obj):
         return obj.created_at.date()
@@ -62,6 +66,8 @@ class SupplierSerializer(serializers.ModelSerializer):
     class Meta:
         model = Supplier
         fields = ('id', 'name', 'email', 'address', 'website', 'date_added', 'is_active', 'notes')
+        
+
 
 class ReplenishTransactionSerializer(serializers.ModelSerializer):
     component_name = serializers.ReadOnlyField(source='component.name')
@@ -85,7 +91,7 @@ class ConsumptionTransactionSerializer(serializers.ModelSerializer):
         quantity = data['quantity']
         component = get_object_or_404(Component, id=component_id)
 
-        if component.quantity < quantity:
+        if component.quantity < quantity and component.order_quantity == 0:
             # create purchase requsition for the component
             purchase_requisition = PurchaseRequisition.objects.create(component=component, quantity=component.order_quantity, priority='high', status='pending')
 

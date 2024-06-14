@@ -62,21 +62,17 @@ class Component(models.Model):
     def __str__(self):
         return self.name
 
-    # def save(self, *args, **kwargs):
-    #     if not self.sku:
-    #         self.sku = self.generate_sku()
-    #     super(Component, self).save(*args, **kwargs)
-
-    # def generate_sku(self):
-    #     base_sku = slugify(self.name)[:10].upper()  # Shorten and capitalize the name for the SKU
-    #     reorder_level = str(self.reorder_level).zfill(3)  # Ensure reorder level is at least 3 digits
-    #     order_quantity = str(self.order_quantity).zfill(3)  # Ensure order quantity is at least 3 digits
-    #     unique_id = uuid.uuid4().hex[:4].upper()  # Generate a unique 4-character ID
-    #     return f"{base_sku}-RL{reorder_level}-OQ{order_quantity}-{unique_id}"
+    def save(self, *args, **kwargs):
+        super(Component, self).save(*args, **kwargs)
+        self.check_inventory()
 
     def check_inventory(self):
         if self.quantity < self.reorder_level and self.order_quantity == 0:
+            purchase_requisition = PurchaseRequisition.objects.create(component=self, quantity=self.reorder_quantity, priority='high', status='pending')
+            self.order_quantity = self.reorder_quantity
             self.notify_low_inventory()
+            
+            
 
     def notify_low_inventory(self):
         user = get_default_user()

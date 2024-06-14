@@ -7,6 +7,9 @@ class Notification(models.Model):
     message = models.TextField()
     read = models.BooleanField(default=False)
     timestamp = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-timestamp']
 
     def __str__(self):
         return self.message

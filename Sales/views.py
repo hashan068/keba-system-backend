@@ -13,6 +13,7 @@ from . import views
 from rest_framework.decorators import api_view
 from datetime import timedelta
 import requests
+# from rest_framework.permissions import IsAuthenticated
 
 @api_view(['POST'])
 def send_quotation_email(request, pk):
@@ -52,7 +53,7 @@ def send_quotation_email(request, pk):
         return Response({"error": "Quotation not found"}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         print(f"Exception: {e}")
-        logger.error(f"Error sending quotation email: {e}")
+
         return Response({"error": "An error occurred while sending the email"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class CustomerViewSet(viewsets.ModelViewSet):
@@ -108,6 +109,7 @@ class SalesOrderItemViewSet(viewsets.ModelViewSet):
 class SalesOrderViewSet(viewsets.ModelViewSet):
     queryset = SalesOrder.objects.all()
     serializer_class = SalesOrderSerializer
+    # permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
         queryset = SalesOrder.objects.all()

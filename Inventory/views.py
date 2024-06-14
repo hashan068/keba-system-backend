@@ -72,8 +72,6 @@ class ConsumptionTransactionViewSet(viewsets.ModelViewSet):
             print("Serializer is valid")
             try:
                 consumption_transaction = serializer.save()
-                # update_material_requisition_status(consumption_transaction.material_requisition_item.material_requisition)
-                # update_manufacturing_order_status(consumption_transaction.material_requisition_item.material_requisition.manufacturing_order)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             except serializers.ValidationError as e:
                 return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
