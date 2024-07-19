@@ -91,11 +91,23 @@ class ConsumptionTransactionSerializer(serializers.ModelSerializer):
         quantity = data['quantity']
         component = get_object_or_404(Component, id=component_id)
 
-        if component.quantity < quantity and component.order_quantity == 0:
-            # create purchase requsition for the component
-            purchase_requisition = PurchaseRequisition.objects.create(component=component, quantity=component.order_quantity, priority='high', status='pending')
-
-            raise serializers.ValidationError(f"Insufficient quantity for component {component.name}. Available quantity: {component.quantity}")
+        if component.quantity < quantity:
+            if component.order_quantity == 0:
+                # Create a purchase requisition for the component
+                purchase_requisition = PurchaseRequisition.objects.create(
+                    component=component, 
+                    quantity=component.reorder_quantity, 
+                    priority='high', 
+                    status='pending'
+                )
+                raise serializers.ValidationError(
+                    f"Insufficient quantity for component {component.name}. Available quantity: {component.quantity}. A purchase requisition has been created."
+                )
+            else:
+                # Raise a different validation error if a purchase requisition is already in place
+                raise serializers.ValidationError(
+                    f"Insufficient quantity for component {component.name}. Available quantity: {component.quantity}. A purchase requisition is already in place."
+                )
 
         return data
 

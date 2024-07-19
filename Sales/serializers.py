@@ -57,7 +57,7 @@ class RFQSerializer(serializers.ModelSerializer):
 class QuotationItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuotationItem
-        fields = ['product', 'quantity', 'unit_price']
+        fields = [ 'id', 'product', 'quantity', 'unit_price']
 
 class QuotationSerializer(serializers.ModelSerializer):
     quotation_items = QuotationItemSerializer(many=True)

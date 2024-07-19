@@ -1,5 +1,6 @@
 # Manufacturing app models.py
 from django.db import models
+from decimal import Decimal
 from django.utils.translation import gettext_lazy as _
 from Inventory.models import Component
 from Sales.models import SalesOrderItem, Product
@@ -79,6 +80,7 @@ class MaterialRequisition(models.Model):
             self.status = 'pending'
         elif approved_items.count() == all_items.count():
             self.status = 'approved'
+            
         elif approved_items.exists():
             self.status = 'partialy_approved'
         else:

@@ -1,5 +1,6 @@
 # Inventory app models.py
 from django.db import models
+from decimal import Decimal
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.conf import settings
@@ -58,9 +59,13 @@ class Component(models.Model):
     unit_of_measure = models.CharField(max_length=20, default='pcs')
     supplier = models.ForeignKey('Supplier', on_delete=models.CASCADE, null=True, blank=True)
     cost = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
+    
+    class Meta:
+        ordering = ['-updated_at']
 
     def save(self, *args, **kwargs):
         super(Component, self).save(*args, **kwargs)

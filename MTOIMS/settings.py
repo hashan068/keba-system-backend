@@ -1,5 +1,6 @@
 import os
 from decouple import config
+from datetime import timedelta
 # Import default_headers
 from corsheaders.defaults import default_headers
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -173,6 +174,13 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
 }
+
+
+# SIMPLE JWT SETTINGS
+# SIMPLE_JWT = {
+#     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),  # Example: 5 minutes
+#     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),  # Example: 7 days
+# }
 
 
 # DJOSER SETTINGS

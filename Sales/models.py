@@ -1,4 +1,5 @@
 from django.db import models
+from decimal import Decimal
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import gettext_lazy as _
@@ -15,6 +16,9 @@ class Customer(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
     notes = models.TextField(blank=True, null=True)
+    
+    class Meta:
+        ordering = ['-created_at']
     
 
     def __str__(self):
@@ -44,6 +48,9 @@ class Product(models.Model):
         self.model_number = f"INV-{self.inverter_type[:3].upper()}-{self.power_rating}-{int(self.frequency)}"
 
         super().save(*args, **kwargs)
+        
+    class Meta:
+        ordering = ['-created_at']
 
     def __str__(self):
         return self.name
@@ -126,7 +133,7 @@ class SalesOrder(models.Model):
 
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='orders')
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='confirmed')
     created_at = models.DateTimeField(default=timezone.now, editable=True)
     # created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
