@@ -31,12 +31,14 @@ class Supplier(models.Model):
         ordering = ['name'] # Order the suppliers by name
         verbose_name_plural = 'Suppliers' # Set the plural name of the model
         
+        
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
 
     def __str__(self):
         return self.name
+    
     
 class Component(models.Model):
     name = models.CharField(max_length=100)
@@ -75,7 +77,7 @@ class Component(models.Model):
             user=user,
             message=f"Inventory level for {self.name} is below the reorder level."
     )
-
+        
 
 class PurchaseRequisition(models.Model):
     # Define choices for status
@@ -107,6 +109,7 @@ class PurchaseRequisition(models.Model):
     class Meta:
         ordering = ['-created_at']
         # ordering = ['priority', 'status']
+        
 
 class PurchaseOrder(models.Model):
     STATUS_CHOICES = [
@@ -120,7 +123,6 @@ class PurchaseOrder(models.Model):
     ]
 
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, default=None)
-    
     purchase_requisition = models.ForeignKey('PurchaseRequisition', on_delete=models.CASCADE)
     supplier = models.ForeignKey('Supplier', on_delete=models.SET_NULL, null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
@@ -128,7 +130,6 @@ class PurchaseOrder(models.Model):
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(default=timezone.now, editable=False)
     updated_at = models.DateTimeField(default=timezone.now, editable=False)
-
     price_per_unit = models.DecimalField(max_digits=10, decimal_places=2,blank=True,)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, editable=False)
 
@@ -141,6 +142,7 @@ class PurchaseOrder(models.Model):
     def save(self, *args, **kwargs):
         self.total_price = self.purchase_requisition.quantity * self.price_per_unit
         super().save(*args, **kwargs)
+        
 
 class ReplenishTransaction(models.Model): 
     purchase_requisition = models.ForeignKey('PurchaseRequisition', on_delete=models.CASCADE)
@@ -162,6 +164,7 @@ class ReplenishTransaction(models.Model):
 
         # Call the save method of the parent class
         super().save(*args, **kwargs)
+        
 
 class ConsumptionTransaction(models.Model):
     material_requisition_item = models.ForeignKey('Manufacturing.MaterialRequisitionItem', on_delete=models.CASCADE)
@@ -169,7 +172,6 @@ class ConsumptionTransaction(models.Model):
     quantity = models.PositiveIntegerField()
     user_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     timestamp = models.DateTimeField(default=timezone.now, editable=False)
-
 
     class Meta:
         ordering = ['-timestamp']
