@@ -7,18 +7,9 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from Notifications.models import Notification
-# from django.utils.text import slugify
-# import uuid
 from django.db.models import SET_DEFAULT, SET_NULL
 
-# User = get_user_model()
-
-# def get_default_user():
-#     return User.objects.filter(is_superuser=True).first()
-
-# superuser = get_default_user()
-# superuser_pk = superuser.pk if superuser else 1
-User = get_user_model()
+User = get_user_model() # Get the user model
 
 def get_default_user():
     # Lazy evaluation: Return a function to be called when needed
@@ -34,11 +25,11 @@ class Supplier(models.Model):
     notes = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return self.name
+        return self.name # Return the name of the supplier
 
     class Meta:
-        ordering = ['name']
-        verbose_name_plural = 'Suppliers'
+        ordering = ['name'] # Order the suppliers by name
+        verbose_name_plural = 'Suppliers' # Set the plural name of the model
         
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -50,7 +41,6 @@ class Category(models.Model):
 class Component(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
-    # sku = models.CharField(max_length=100, unique=True, blank=True)
     quantity = models.PositiveIntegerField(default=0)
     category = models.ForeignKey(Category, on_delete=SET_NULL, null=True, blank=True, related_name='components')
     reorder_level = models.PositiveIntegerField(default=0)

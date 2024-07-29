@@ -11,39 +11,39 @@ from .serializers import ComponentSerializer, PurchaseRequisitionSerializer, Pur
 from Manufacturing.models import MaterialRequisitionItem
 from .utils import update_component_quantity
 
+ # Create your views here.
+class ComponentViewSet(viewsets.ModelViewSet): 
+    queryset = Component.objects.all() # Get all the components
+    serializer_class = ComponentSerializer # Use the ComponentSerializer to serialize the data
 
-class ComponentViewSet(viewsets.ModelViewSet):
-    queryset = Component.objects.all()
-    serializer_class = ComponentSerializer
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        print(f"Request data: {request.data}")
-        if serializer.is_valid():
+    def create(self, request, *args, **kwargs): # Create a new component
+        serializer = self.get_serializer(data=request.data) # Get the serializer
+        print(f"Request data: {request.data}") 
+        if serializer.is_valid(): 
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED) # Return the data if the serializer is valid
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) # Return the errors if the serializer is not valid
 
-class PurchaseRequisitionViewSet(viewsets.ModelViewSet):
-    queryset = PurchaseRequisition.objects.all()
-    serializer_class = PurchaseRequisitionSerializer
+class PurchaseRequisitionViewSet(viewsets.ModelViewSet): # ViewSet for PurchaseRequisition
+    queryset = PurchaseRequisition.objects.all() # Get all the purchase requisitions
+    serializer_class = PurchaseRequisitionSerializer # Use the PurchaseRequisitionSerializer to serialize the data
     
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+    def create(self, request, *args, **kwargs): # Create a new purchase requisition
+        serializer = self.get_serializer(data=request.data) # Get the serializer
         print(f"Request data: {request.data}")
 
         if serializer.is_valid():
-            print("Serializer is valid")
+            print("Serializer is valid") # Check if the serializer is valid
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_201_CREATED) # Return the data if the serializer is valid
         else:
             print("Serializer errors:", serializer.errors)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) # Return the errors if the serializer is not valid
 
-class PurchaseOrderViewSet(viewsets.ModelViewSet):
-    queryset = PurchaseOrder.objects.all()
-    serializer_class = PurchaseOrderSerializer
+class PurchaseOrderViewSet(viewsets.ModelViewSet): # ViewSet for PurchaseOrder
+    queryset = PurchaseOrder.objects.all() # Get all the purchase orders
+    serializer_class = PurchaseOrderSerializer # Use the PurchaseOrderSerializer to serialize the data
 
 class SupplierViewSet(viewsets.ModelViewSet):
     queryset = Supplier.objects.all()
@@ -53,11 +53,11 @@ class ReplenishTransactionViewSet(viewsets.ModelViewSet):
     queryset = ReplenishTransaction.objects.all()
     serializer_class = ReplenishTransactionSerializer
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+    def create(self, request, *args, **kwargs): # Create a new replenish transaction
+        serializer = self.get_serializer(data=request.data) # Get the serializer
+        if serializer.is_valid(): # Check if the serializer is valid
+            serializer.save() 
+            return Response(serializer.data, status=status.HTTP_201_CREATED) 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ConsumptionTransactionViewSet(viewsets.ModelViewSet):
