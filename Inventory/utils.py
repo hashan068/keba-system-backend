@@ -1,8 +1,6 @@
 # utils.py
 from django.db import transaction
-
 from .models import ConsumptionTransaction, Component
-
 from django.shortcuts import get_object_or_404
 
 def get_material_requisition_serializer():
@@ -13,7 +11,7 @@ def get_manufacturing_order_serializer():
     from Manufacturing.serializers import ManufacturingOrderSerializer
     return ManufacturingOrderSerializer
 
-def get_material_requisition_item_serializer():
+def get_material_requisition_item_serializer(): 
     from Manufacturing.serializers import MaterialRequisitionItemSerializer
     return MaterialRequisitionItemSerializer
 
